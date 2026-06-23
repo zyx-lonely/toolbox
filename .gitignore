@@ -27,3 +27,8 @@ Thumbs.db
 *.exe~
 *.test
 *.out
+
+# 临时截图
+internal/tray/screenshot*.webp
+# 工作记忆
+.workbuddy/

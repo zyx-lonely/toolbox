@@ -1,14 +1,18 @@
 package devtools
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 // JSONResult JSON 处理结果
@@ -334,14 +338,17 @@ func ConvertColor(hex string) ColorResult {
 	}
 }
 
-// GenerateUUID 生成简单 UUID v4
+// GenerateUUID 生成标准 UUID v4（使用 crypto/rand）
 func GenerateUUID() string {
 	b := make([]byte, 16)
-	// 使用时间 + 随机数模拟
-	t := time.Now().UnixNano()
-	for i := 0; i < 8; i++ {
-		b[i] = byte(t >> (i * 8))
-		b[i+8] = byte(t >> ((i + 8) * 8))
+	if _, err := rand.Read(b); err != nil {
+		// 极端情况下降级到时间戳方案
+		return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+			big.NewInt(0).SetBytes(b[:4]).Uint64(),
+			big.NewInt(0).SetBytes(b[4:6]).Uint64(),
+			big.NewInt(0).SetBytes(b[6:8]).Uint64(),
+			big.NewInt(0).SetBytes(b[8:10]).Uint64(),
+			big.NewInt(0).SetBytes(b[10:16]).Uint64())
 	}
 	b[6] = (b[6] & 0x0f) | 0x40 // version 4
 	b[8] = (b[8] & 0x3f) | 0x80 // variant
@@ -357,18 +364,20 @@ type CronExpression struct {
 	NextRun     string `json:"nextRun"`
 }
 
-// ParseCron 解析 Cron 表达式（简易版）
+// ParseCron 解析 Cron 表达式，计算下次执行时间
 func ParseCron(expr string) CronExpression {
-	parts := strings.Fields(expr)
-	if len(parts) != 5 && len(parts) != 6 {
+	// 尝试解析 5 位或 6 位（含秒）cron 表达式
+	parser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.SecondOptional)
+	schedule, err := parser.Parse(expr)
+	if err != nil {
 		return CronExpression{
 			Expression:  expr,
-			Description: "无效的 Cron 表达式（需要 5 或 6 个字段）",
+			Description: fmt.Sprintf("无效的 Cron 表达式: %v", err),
 		}
 	}
 
-	desc := describeCron(parts)
-	next := time.Now().Add(5 * time.Minute).Format("2006-01-02 15:04")
+	desc := describeCron(expr)
+	next := schedule.Next(time.Now()).Format("2006-01-02 15:04:05")
 
 	return CronExpression{
 		Expression:  expr,
@@ -377,18 +386,33 @@ func ParseCron(expr string) CronExpression {
 	}
 }
 
-func describeCron(parts []string) string {
-	// 简化描述
-	switch parts[0] {
-	case "*":
-		return "每分钟执行"
-	case "0":
-		if parts[1] == "0" {
-			return "每小时执行"
-		}
-		return "每小时的第 " + parts[1] + " 分执行"
+func describeCron(expr string) string {
+	parts := strings.Fields(expr)
+	if len(parts) < 5 {
+		return "自定义间隔: " + expr
+	}
+
+	// 生成人类可读描述
+	minute, hour := parts[0], parts[1]
+	dom, month, dow := parts[2], parts[3], parts[4]
+
+	switch {
+	case minute == "0" && hour == "0":
+		return "每天午夜执行"
+	case minute == "0" && hour == "*":
+		return "每小时整点执行"
+	case minute == "*/5":
+		return "每 5 分钟执行"
+	case minute == "*/15":
+		return "每 15 分钟执行"
+	case minute == "*/30":
+		return "每 30 分钟执行"
+	case minute == "0" && dom == "*" && month == "*" && dow == "*":
+		return "每天 " + hour + ":00 执行"
+	case dow != "*" && dow != "?":
+		return "每周 " + dow + " 的 " + hour + ":" + minute + " 执行"
 	default:
-		return "自定义间隔: " + strings.Join(parts, " ")
+		return "按计划: " + expr
 	}
 }
 

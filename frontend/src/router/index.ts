@@ -62,6 +62,54 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '注册表清理', icon: 'analytics-outline' }
       },
       {
+        path: 'optimize/winupdate',
+        name: 'WindowsUpdate',
+        component: () => import('../views/optimize/WindowsUpdate.vue'),
+        meta: { title: 'Windows 更新管理', icon: 'cloud-download-outline' }
+      },
+      {
+        path: 'optimize/software',
+        name: 'SoftwareManage',
+        component: () => import('../views/optimize/SoftwareManage.vue'),
+        meta: { title: '软件管理', icon: 'apps-outline' }
+      },
+      {
+        path: 'optimize/env',
+        name: 'EnvManager',
+        component: () => import('../views/optimize/EnvManager.vue'),
+        meta: { title: '环境变量管理', icon: 'options-outline' }
+      },
+      {
+        path: 'optimize/disk-health',
+        name: 'DiskHealth',
+        component: () => import('../views/optimize/DiskHealth.vue'),
+        meta: { title: '磁盘健康监控', icon: 'speedometer-outline' }
+      },
+      {
+        path: 'optimize/service-dep',
+        name: 'ServiceDependency',
+        component: () => import('../views/optimize/ServiceDependency.vue'),
+        meta: { title: '服务依赖分析', icon: 'git-network-outline' }
+      },
+      {
+        path: 'optimize/fileassoc',
+        name: 'FileAssoc',
+        component: () => import('../views/optimize/FileAssoc.vue'),
+        meta: { title: '文件关联管理', icon: 'document-attach-outline' }
+      },
+      {
+        path: 'tools/external',
+        name: 'ExternalTools',
+        component: () => import('../views/tools/ExternalTools.vue'),
+        meta: { title: '外部工具', icon: 'construct-outline' }
+      },
+      {
+        path: 'tools/essential',
+        name: 'EssentialSoftware',
+        component: () => import('../views/tools/EssentialSoftware.vue'),
+        meta: { title: '系统必备软件', icon: 'download-outline' }
+      },
+      {
         path: 'system/report',
         name: 'HardwareReport',
         component: () => import('../views/system/HardwareReport.vue'),
@@ -84,6 +132,24 @@ const routes: RouteRecordRaw[] = [
         name: 'ProcessManager',
         component: () => import('../views/system/ProcessManager.vue'),
         meta: { title: '进程管理器', icon: 'pulse-outline' }
+      },
+      {
+        path: 'system/temperature',
+        name: 'Temperature',
+        component: () => import('../views/system/Temperature.vue'),
+        meta: { title: '温度监控', icon: 'thermometer-outline' }
+      },
+      {
+        path: 'system/export',
+        name: 'ReportExport',
+        component: () => import('../views/system/ReportExport.vue'),
+        meta: { title: '导出报告', icon: 'document-text-outline' }
+      },
+      {
+        path: 'system/browser-ext',
+        name: 'BrowserExtensions',
+        component: () => import('../views/system/BrowserExtensions.vue'),
+        meta: { title: '浏览器扩展', icon: 'logo-chrome-outline' }
       },
       {
         path: 'network',
@@ -135,6 +201,30 @@ const routes: RouteRecordRaw[] = [
         name: 'TrafficChart',
         component: () => import('../views/network/TrafficChart.vue'),
         meta: { title: '流量图表', icon: 'stats-chart-outline' }
+      },
+      {
+        path: 'network/portusage',
+        name: 'PortUsage',
+        component: () => import('../views/network/PortUsage.vue'),
+        meta: { title: '端口占用查询', icon: 'list-outline' }
+      },
+      {
+        path: 'network/dns',
+        name: 'DnsSwitcher',
+        component: () => import('../views/network/DnsSwitcher.vue'),
+        meta: { title: 'DNS 切换', icon: 'swap-horizontal-outline' }
+      },
+      {
+        path: 'network/subnet',
+        name: 'SubnetCalculator',
+        component: () => import('../views/network/SubnetCalculator.vue'),
+        meta: { title: 'IP 子网计算器', icon: 'calculator-outline' }
+      },
+      {
+        path: 'network/speedtest',
+        name: 'SpeedTest',
+        component: () => import('../views/network/SpeedTest.vue'),
+        meta: { title: '网速测试', icon: 'speedometer-outline' }
       },
       {
         path: 'file/duplicate',
@@ -217,6 +307,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '文件哈希校验', icon: 'finger-print-outline' }
       },
       {
+        path: 'file/timestamp',
+        name: 'FileTimestamp',
+        component: () => import('../views/file/FileTimestamp.vue'),
+        meta: { title: '文件时间戳修改', icon: 'time-outline' }
+      },
+      {
+        path: 'file/batchregex',
+        name: 'BatchRegexRename',
+        component: () => import('../views/file/BatchRegexRename.vue'),
+        meta: { title: '批量正则重命名', icon: 'text-outline' }
+      },
+      {
         path: 'security/shred',
         name: 'FileShred',
         component: () => import('../views/security/FileShred.vue'),
@@ -268,6 +370,24 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Cron 生成器', icon: 'timer-outline' }
       },
       {
+        path: 'devtools/textdiff',
+        name: 'TextDiff',
+        component: () => import('../views/devtools/TextDiff.vue'),
+        meta: { title: '文本对比', icon: 'git-compare-outline' }
+      },
+      {
+        path: 'devtools/textcount',
+        name: 'TextCounter',
+        component: () => import('../views/devtools/TextCounter.vue'),
+        meta: { title: '文本字数统计', icon: 'stats-chart-outline' }
+      },
+      {
+        path: 'devtools/jsoncsv',
+        name: 'JsonCsvConverter',
+        component: () => import('../views/devtools/JsonCsvConverter.vue'),
+        meta: { title: 'JSON/CSV 互转', icon: 'swap-horizontal-outline' }
+      },
+      {
         path: 'devtools/qrcode',
         name: 'QRCodeGen',
         component: () => import('../views/devtools/QRCodeGen.vue'),
@@ -316,17 +436,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '定时任务', icon: 'alarm-outline' }
       },
       {
+        path: 'daily/notepad',
+        name: 'Notepad',
+        component: () => import('../views/daily/Notepad.vue'),
+        meta: { title: '便签', icon: 'document-text-outline' }
+      },
+      {
         path: 'daily/reminder',
         name: 'Reminder',
         component: () => import('../views/daily/Reminder.vue'),
         meta: { title: '提醒事项', icon: 'notifications-outline' }
       },
-      {
-        path: 'daily/camera',
-        name: 'CameraCapture',
-        component: () => import('../views/daily/CameraCapture.vue'),
-        meta: { title: '摄像头拍照', icon: 'camera-outline' }
-      },
+
       {
         path: 'settings',
         name: 'Settings',
@@ -341,7 +462,10 @@ const routes: RouteRecordRaw[] = [
       },
       { path: 'settings/update', name: 'AutoUpdate', component: () => import('../views/settings/AutoUpdate.vue'), meta: { title: '检查更新' } },
       { path: 'settings/themes', name: 'ThemeStore', component: () => import('../views/settings/ThemeStore.vue'), meta: { title: '主题商店' } },
-      { path: 'settings/logs', name: 'OperationLog', component: () => import('../views/settings/OperationLog.vue'), meta: { title: '操作日志' } }
+      { path: 'settings/logs', name: 'OperationLog', component: () => import('../views/settings/OperationLog.vue'), meta: { title: '操作日志' } },
+      { path: 'file/preview', name: 'FilePreview', component: () => import('../views/file/FilePreview.vue'), meta: { title: '文件预览', icon: 'eye-outline' } },
+      { path: 'daily/ruler', name: 'ScreenRuler', component: () => import('../views/daily/ScreenRuler.vue'), meta: { title: '屏幕标尺', icon: 'resize-outline' } },
+      { path: 'system/shortcuts', name: 'ShortcutManager', component: () => import('../views/system/ShortcutManager.vue'), meta: { title: '快捷键管理', icon: 'keypad-outline' } }
     ]
   }
 ]
@@ -349,6 +473,12 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+})
+
+router.beforeEach((to) => {
+  if (to.matched.length === 0) {
+    return '/dashboard'
+  }
 })
 
 export default router

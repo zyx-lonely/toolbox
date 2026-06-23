@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/image/draw"
 )
 
 // BatchCompressResult 批量压缩结果
@@ -61,9 +63,16 @@ func compressSingleImage(inputPath string, quality int, targetFormat string, max
 	if maxWidth > 0 {
 		bounds := img.Bounds()
 		w := bounds.Dx()
+		h := bounds.Dy()
 		if w > maxWidth {
-			// 简单缩放比例
-			_ = w
+			newW := maxWidth
+			newH := int(float64(h) * float64(newW) / float64(w))
+			if newH < 1 {
+				newH = 1
+			}
+			resized := image.NewRGBA(image.Rect(0, 0, newW, newH))
+			draw.ApproxBiLinear.Scale(resized, resized.Bounds(), img, bounds, draw.Over, nil)
+			img = resized
 		}
 	}
 

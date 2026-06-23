@@ -3,7 +3,9 @@ package devtools
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -27,6 +29,30 @@ type HTTPResponse struct {
 	Error      string `json:"error,omitempty"`
 }
 
+// validateURL 验证 URL 安全性，防止 SSRF
+func validateURL(rawURL string) error {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("无效 URL: %v", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return fmt.Errorf("仅支持 http/https 协议")
+	}
+	host := parsed.Hostname()
+	if host == "" {
+		return fmt.Errorf("URL 缺少主机名")
+	}
+	ips, err := net.LookupIP(host)
+	if err == nil {
+		for _, ip := range ips {
+			if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsUnspecified() {
+				return fmt.Errorf("不允许访问内网/本地地址: %s", host)
+			}
+		}
+	}
+	return nil
+}
+
 // SendHTTPRequest 发送 HTTP 请求
 func SendHTTPRequest(req HTTPRequest) HTTPResponse {
 	if req.URL == "" {
@@ -34,6 +60,10 @@ func SendHTTPRequest(req HTTPRequest) HTTPResponse {
 	}
 	if req.Method == "" {
 		req.Method = "GET"
+	}
+
+	if err := validateURL(req.URL); err != nil {
+		return HTTPResponse{Error: fmt.Sprintf("URL 安全验证失败: %v", err)}
 	}
 
 	start := time.Now()

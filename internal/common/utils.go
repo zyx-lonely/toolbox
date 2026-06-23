@@ -22,7 +22,10 @@ func GetTotalSize(path string) (uint64, error) {
 		}
 		return nil
 	})
-	return total, err
+	if err != nil {
+		return 0, fmt.Errorf("计算目录大小失败: %v", err)
+	}
+	return total, nil
 }
 
 // FormatBytes 格式化字节数为人类可读格式
@@ -67,13 +70,22 @@ func FileExists(path string) bool {
 
 // OpenURL 在系统默认浏览器中打开 URL
 func OpenURL(url string) error {
+	if url == "" {
+		return fmt.Errorf("URL 不能为空")
+	}
 	c := exec.Command("cmd", "/c", "start", "", url)
 	c.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	return c.Start()
+	if err := c.Start(); err != nil {
+		return fmt.Errorf("打开 URL 失败: %v", err)
+	}
+	return nil
 }
 
 // ReadFileAsBase64 读取文件并返回 Base64 编码的数据 URI
 func ReadFileAsBase64(path string) string {
+	if path == "" {
+		return ""
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return ""

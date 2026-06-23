@@ -22,10 +22,10 @@
 
 <script setup lang="ts">
 import { h, ref, onMounted } from 'vue'
-import { NSwitch, NTag, useMessage } from 'naive-ui'
-import { GetStartupItems, ToggleStartupItem } from '@wails/go/main/App'
+import { NSwitch, NTag, useMessage, NInput } from 'naive-ui'
+import { GetStartupItems, ToggleStartupItem, SetStartupItemDelay } from '@wails/go/main/App'
 
-interface StartupItem { name: string; command: string; location: string; publisher: string; enabled: boolean; impact: string }
+interface StartupItem { name: string; command: string; location: string; publisher: string; enabled: boolean; impact: string; delay: number }
 
 const items = ref<StartupItem[]>([])
 const loading = ref(false)
@@ -48,6 +48,22 @@ const columns = [
       value: row.enabled,
       onUpdateValue: (val: boolean) => toggleItem(row, val)
     })
+  },
+  {
+    title: '延迟(秒)', key: 'delay', width: 100,
+    render: (row: StartupItem) => h('div', { style: 'display: flex; align-items: center; gap: 4px' }, [
+      h(NInput, {
+        value: String(row.delay || 0),
+        size: 'small',
+        style: 'width: 60px',
+        placeholder: '0',
+        onUpdateValue: (val: string) => {
+          const delay = parseInt(val) || 0
+          setDelay(row, delay)
+        }
+      }),
+      h('span', { style: 'font-size: 12px; color: #999' }, { default: () => '秒' })
+    ])
   }
 ]
 
@@ -65,6 +81,20 @@ async function toggleItem(item: StartupItem, enable: boolean) {
     await ToggleStartupItem(item.name, enable)
     item.enabled = enable
     message.success(enable ? '已启用' : '已禁用')
+  } catch (e: any) {
+    message.error(`操作失败: ${e}`)
+  }
+}
+
+async function setDelay(item: StartupItem, delay: number) {
+  try {
+    const r = await SetStartupItemDelay(item.name, delay)
+    if (r && r.success) {
+      item.delay = delay
+      message.success(`已设置延迟 ${delay} 秒`)
+    } else {
+      message.error(r?.error || '设置失败')
+    }
   } catch (e: any) {
     message.error(`操作失败: ${e}`)
   }

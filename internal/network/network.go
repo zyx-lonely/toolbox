@@ -6,10 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"pc-toolbox/internal/common"
@@ -27,14 +27,14 @@ type PingResult struct {
 
 // PingSummary Ping 统计
 type PingSummary struct {
-	Target    string       `json:"target"`
-	Results   []PingResult `json:"results"`
-	Sent      int          `json:"sent"`
-	Received  int          `json:"received"`
-	LossRate  float64      `json:"lossRate"`
-	MinLatency string      `json:"minLatency"`
-	MaxLatency string      `json:"maxLatency"`
-	AvgLatency string      `json:"avgLatency"`
+	Target     string       `json:"target"`
+	Results    []PingResult `json:"results"`
+	Sent       int          `json:"sent"`
+	Received   int          `json:"received"`
+	LossRate   float64      `json:"lossRate"`
+	MinLatency string       `json:"minLatency"`
+	MaxLatency string       `json:"maxLatency"`
+	AvgLatency string       `json:"avgLatency"`
 }
 
 // PortResult 端口扫描结果
@@ -55,14 +55,14 @@ type DNSResult struct {
 
 // ConnectionInfo 网络连接信息
 type ConnectionInfo struct {
-	Protocol  string `json:"protocol"`
-	LocalAddr string `json:"localAddr"`
-	LocalPort int    `json:"localPort"`
+	Protocol   string `json:"protocol"`
+	LocalAddr  string `json:"localAddr"`
+	LocalPort  int    `json:"localPort"`
 	RemoteAddr string `json:"remoteAddr"`
 	RemotePort int    `json:"remotePort"`
-	State     string `json:"state"`
-	PID       int    `json:"pid"`
-	Process   string `json:"process"`
+	State      string `json:"state"`
+	PID        int    `json:"pid"`
+	Process    string `json:"process"`
 }
 
 // 常用端口到服务名的映射
@@ -93,10 +93,16 @@ func Ping(host string, count int, timeout int) (*PingSummary, error) {
 	var mu sync.Mutex
 	timeoutMs := timeout
 
+	// 并发限制（最多同时 100 个 ping）
+	sem := make(chan struct{}, 100)
+
 	for i := 0; i < count; i++ {
 		wg.Add(1)
 		go func(seq int) {
 			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
 			result := pingOnce(host, seq, timeoutMs)
 			mu.Lock()
 			summary.Results = append(summary.Results, result)

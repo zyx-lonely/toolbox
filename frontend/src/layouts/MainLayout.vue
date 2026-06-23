@@ -36,6 +36,27 @@
         <div class="header-right">
           <n-tooltip trigger="hover">
             <template #trigger>
+              <n-button size="small" quaternary @click="showPalette = true" style="font-size: 12px; font-weight: 500">
+                Ctrl+K
+              </n-button>
+            </template>
+            <span>搜索工具（Ctrl+K）</span>
+          </n-tooltip>
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-button quaternary circle @click="toggleFavorite">
+                <template #icon>
+                  <n-icon>
+                    <StarOutline v-if="!isFavorite" />
+                    <Star v-else />
+                  </n-icon>
+                </template>
+              </n-button>
+            </template>
+            <span>{{ isFavorite ? '取消收藏' : '收藏此工具' }}</span>
+          </n-tooltip>
+          <n-tooltip trigger="hover">
+            <template #trigger">
               <n-button quaternary circle @click="appStore.toggleDarkMode()">
                 <template #icon>
                   <n-icon><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M264 480A232 232 0 0132 248c0-94 54-178.28 137.61-214.67a16 16 0 0118.31 4.85 15.89 15.89 0 011.88 18.91C176.34 86.17 168 116.68 168 152c0 105.87 86.13 192 192 192 35.32 0 65.83-8.34 94.91-23.88a15.89 15.89 0 0118.91 1.88 16 16 0 014.85 18.31C442.28 301.78 358 480 264 480z" fill="currentColor"/></svg></n-icon>
@@ -56,9 +77,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, watch, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NIcon, type MenuOption } from 'naive-ui'
+import { NIcon, type MenuOption, useOsTheme } from 'naive-ui'
 import {
   GridOutline,
   HardwareChipOutline,
@@ -73,7 +94,6 @@ import {
   LockOpenOutline,
   DocumentTextOutline,
   AnalyticsOutline,
-  LogoChromeOutline,
   LocationOutline,
   WifiOutline,
   ListOutline,
@@ -84,19 +104,69 @@ import {
   ClipboardOutline,
   AlarmOutline,
   CalculatorOutline,
-  CameraOutline,
   ColorPaletteOutline,
   TimerOutline,
-  CogOutline
+  CogOutline,
+  StatsChartOutline,
+  StarOutline,
+  Star,
+  AppsOutline,
+  ConstructOutline
 } from '@vicons/ionicons5'
 import { useAppStore } from '../store/app'
+import { useToolsStore } from '../store/tools'
 import CommandPalette from '../components/CommandPalette.vue'
-import { onMounted, onUnmounted, ref } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const toolsStore = useToolsStore()
 const showPalette = ref(false)
+
+// 初始化 tools store
+toolsStore.init()
+
+// 应用深色模式
+watch(() => appStore.darkMode, (val) => {
+  if (val) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}, { immediate: true })
+
+// 当前页面是否已收藏
+const isFavorite = computed(() => {
+  return toolsStore.isFavorite(route.path)
+})
+
+// 切换收藏状态
+function toggleFavorite() {
+  const title = currentTitle.value
+  if (title) {
+    toolsStore.toggleFavorite({
+      title: title,
+      path: route.path
+    })
+  }
+}
+
+// 记录最近使用
+function recordRecent() {
+  const title = currentTitle.value
+  if (title && route.path !== '/') {
+    toolsStore.addRecent({
+      title: title,
+      path: route.path
+    })
+  }
+}
+
+// 监听路由变化，记录最近使用
+watch(() => route.path, () => {
+  // 延迟执行，确保页面已加载
+  setTimeout(() => recordRecent(), 500)
+})
 
 function renderIcon(icon: any) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -114,6 +184,10 @@ const menuOptions: MenuOption[] = [
       { label: '系统激活', key: '/system/activation' },
       { label: '电源方案', key: '/system/powerplan' },
       { label: '进程管理器', key: '/system/process' },
+      { label: '温度监控', key: '/system/temperature' },
+      { label: '浏览器扩展', key: '/system/browser-ext' },
+      { label: '导出报告', key: '/system/export' },
+      { label: '快捷键管理', key: '/system/shortcuts' },
     ]
   },
   {
@@ -127,7 +201,13 @@ const menuOptions: MenuOption[] = [
       { label: '系统健康体检', key: '/optimize/health' },
       { label: '系统备份与还原', key: '/optimize/restore' },
       { label: '浏览器数据管理', key: '/optimize/browser' },
-      { label: '注册表清理', key: '/optimize/registry' }
+      { label: '注册表清理', key: '/optimize/registry' },
+      { label: 'Windows 更新管理', key: '/optimize/winupdate' },
+      { label: '环境变量管理', key: '/optimize/env' },
+      { label: '磁盘健康监控', key: '/optimize/disk-health' },
+      { label: '服务依赖分析', key: '/optimize/service-dep' },
+      { label: '文件关联管理', key: '/optimize/fileassoc' },
+      { label: '软件管理', key: '/optimize/software' }
     ]
   },
   {
@@ -146,6 +226,10 @@ const menuOptions: MenuOption[] = [
       { label: '批量 Ping', key: '/network/batchping' },
       { label: '流量图表', key: '/network/traffic' },
       { label: '远程桌面', key: '/network/rdp' },
+      { label: '端口占用查询', key: '/network/portusage' },
+      { label: 'DNS 切换', key: '/network/dns' },
+      { label: 'IP 子网计算器', key: '/network/subnet' },
+      { label: '网速测试', key: '/network/speedtest' },
     ]
   },
   {
@@ -166,7 +250,19 @@ const menuOptions: MenuOption[] = [
       { label: 'PDF 工具', key: '/file/pdf' },
       { label: '批量重命名', key: '/file/rename' },
       { label: '文件批量归类', key: '/file/organize' },
-      { label: '文件解锁器', key: '/file/unlock' }
+      { label: '文件解锁器', key: '/file/unlock' },
+      { label: '文件时间戳修改', key: '/file/timestamp' },
+      { label: '批量正则重命名', key: '/file/batchregex' },
+      { label: '文件预览', key: '/file/preview' }
+    ]
+  },
+  {
+    label: '外部工具',
+    key: 'external-tools',
+    icon: renderIcon(ConstructOutline),
+    children: [
+      { label: '外部工具管理', key: '/tools/external' },
+      { label: '系统必备软件', key: '/tools/essential' }
     ]
   },
   {
@@ -187,7 +283,10 @@ const menuOptions: MenuOption[] = [
       { label: '密码生成器', key: '/security/password' },
       { label: '文件加密解密', key: '/security/encrypt' },
       { label: '文件粉碎', key: '/security/shred' },
-      { label: 'Cron 生成器', key: '/devtools/cron' }
+      { label: 'Cron 生成器', key: '/devtools/cron' },
+      { label: '文本对比', key: '/devtools/textdiff' },
+      { label: '文本字数统计', key: '/devtools/textcount' },
+      { label: 'JSON/CSV 互转', key: '/devtools/jsoncsv' }
     ]
   },
   {
@@ -199,10 +298,11 @@ const menuOptions: MenuOption[] = [
       { label: '取色器', key: '/daily/colorpicker' },
       { label: '截屏工具', key: '/daily/screenshot' },
       { label: '番茄时钟', key: '/daily/pomodoro' },
-      { label: '摄像头拍照', key: '/daily/camera' },
       { label: '定时提醒', key: '/daily/reminder' },
       { label: '剪贴板历史', key: '/daily/clipboard' },
       { label: '定时任务', key: '/daily/scheduler' },
+      { label: '便签', key: '/daily/notepad' },
+      { label: '屏幕标尺', key: '/daily/ruler' },
     ]
   },
   {

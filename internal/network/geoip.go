@@ -42,7 +42,7 @@ func QueryGeoIP(ip string) GeoIPResult {
 	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	url := fmt.Sprintf("http://ip-api.com/json/%s?fields=status,message,country,region,city,isp,org,lat,lon,query", ip)
+	url := fmt.Sprintf("https://ip-api.com/json/%s?fields=status,message,country,region,city,isp,org,lat,lon,query", ip)
 
 	resp, err := client.Get(url)
 	if err != nil {

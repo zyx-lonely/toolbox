@@ -18,6 +18,10 @@ export function BatchCompressImages(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['BatchCompressImages'](arg1, arg2, arg3, arg4);
 }
 
+export function BatchKillProcesses(arg1) {
+  return window['go']['main']['App']['BatchKillProcesses'](arg1);
+}
+
 export function BatchPing(arg1, arg2) {
   return window['go']['main']['App']['BatchPing'](arg1, arg2);
 }
@@ -28,6 +32,10 @@ export function BatchRename(arg1, arg2) {
 
 export function BatchRenamePreview(arg1, arg2) {
   return window['go']['main']['App']['BatchRenamePreview'](arg1, arg2);
+}
+
+export function BatchUninstallSoftware(arg1) {
+  return window['go']['main']['App']['BatchUninstallSoftware'](arg1);
 }
 
 export function BeautifyCSS(arg1) {
@@ -62,6 +70,10 @@ export function CheckIPConflict(arg1) {
   return window['go']['main']['App']['CheckIPConflict'](arg1);
 }
 
+export function CheckToolExists(arg1) {
+  return window['go']['main']['App']['CheckToolExists'](arg1);
+}
+
 export function CheckUpdate(arg1) {
   return window['go']['main']['App']['CheckUpdate'](arg1);
 }
@@ -78,16 +90,16 @@ export function ClearClipboardHistory() {
   return window['go']['main']['App']['ClearClipboardHistory']();
 }
 
+export function ClearOperationLogs() {
+  return window['go']['main']['App']['ClearOperationLogs']();
+}
+
 export function ClearRecentDocs() {
   return window['go']['main']['App']['ClearRecentDocs']();
 }
 
 export function ClearServiceBackups() {
   return window['go']['main']['App']['ClearServiceBackups']();
-}
-
-export function CollectReport() {
-  return window['go']['main']['App']['CollectReport']();
 }
 
 export function ComputeFileHash(arg1, arg2) {
@@ -162,8 +174,16 @@ export function DiffText(arg1, arg2) {
   return window['go']['main']['App']['DiffText'](arg1, arg2);
 }
 
+export function DisableBrowserExtension(arg1, arg2) {
+  return window['go']['main']['App']['DisableBrowserExtension'](arg1, arg2);
+}
+
 export function EmptyRecycleBin() {
   return window['go']['main']['App']['EmptyRecycleBin']();
+}
+
+export function EnableBrowserExtension(arg1, arg2) {
+  return window['go']['main']['App']['EnableBrowserExtension'](arg1, arg2);
 }
 
 export function EncodeBase64(arg1) {
@@ -180,6 +200,10 @@ export function EncryptFile(arg1, arg2) {
 
 export function ExecuteOrganize(arg1, arg2) {
   return window['go']['main']['App']['ExecuteOrganize'](arg1, arg2);
+}
+
+export function ExportSoftwareList(arg1, arg2) {
+  return window['go']['main']['App']['ExportSoftwareList'](arg1, arg2);
 }
 
 export function FindDuplicateFiles(arg1, arg2) {
@@ -210,16 +234,16 @@ export function FormatYAML(arg1) {
   return window['go']['main']['App']['FormatYAML'](arg1);
 }
 
-export function GenerateHTMLReport() {
-  return window['go']['main']['App']['GenerateHTMLReport']();
-}
-
 export function GeneratePassword(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['GeneratePassword'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function GenerateQRCode(arg1, arg2) {
   return window['go']['main']['App']['GenerateQRCode'](arg1, arg2);
+}
+
+export function GenerateSystemReport(arg1) {
+  return window['go']['main']['App']['GenerateSystemReport'](arg1);
 }
 
 export function GenerateUUID() {
@@ -242,6 +266,10 @@ export function GetAppVersion() {
   return window['go']['main']['App']['GetAppVersion']();
 }
 
+export function GetBrowserExtensions() {
+  return window['go']['main']['App']['GetBrowserExtensions']();
+}
+
 export function GetBuildDate() {
   return window['go']['main']['App']['GetBuildDate']();
 }
@@ -250,8 +278,16 @@ export function GetClipboardHistory() {
   return window['go']['main']['App']['GetClipboardHistory']();
 }
 
+export function GetClipboardText() {
+  return window['go']['main']['App']['GetClipboardText']();
+}
+
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
+}
+
+export function GetExternalTools() {
+  return window['go']['main']['App']['GetExternalTools']();
 }
 
 export function GetHardwareMonitor() {
@@ -262,12 +298,20 @@ export function GetHostsEntries() {
   return window['go']['main']['App']['GetHostsEntries']();
 }
 
+export function GetInstalledSoftware() {
+  return window['go']['main']['App']['GetInstalledSoftware']();
+}
+
 export function GetKMSMethods() {
   return window['go']['main']['App']['GetKMSMethods']();
 }
 
 export function GetNetworkConnections() {
   return window['go']['main']['App']['GetNetworkConnections']();
+}
+
+export function GetOperationLogs() {
+  return window['go']['main']['App']['GetOperationLogs']();
 }
 
 export function GetOptimizationProfiles() {
@@ -302,12 +346,28 @@ export function GetServices() {
   return window['go']['main']['App']['GetServices']();
 }
 
+export function GetShortcutKeys() {
+  return window['go']['main']['App']['GetShortcutKeys']();
+}
+
+export function GetStartupItemDelay(arg1) {
+  return window['go']['main']['App']['GetStartupItemDelay'](arg1);
+}
+
 export function GetStartupItems() {
   return window['go']['main']['App']['GetStartupItems']();
 }
 
 export function GetSystemInfo() {
   return window['go']['main']['App']['GetSystemInfo']();
+}
+
+export function GetTemperatures() {
+  return window['go']['main']['App']['GetTemperatures']();
+}
+
+export function GetToolsDir() {
+  return window['go']['main']['App']['GetToolsDir']();
 }
 
 export function GetTrafficSamples(arg1) {
@@ -362,16 +422,16 @@ export function OpenInExplorer(arg1) {
   return window['go']['main']['App']['OpenInExplorer'](arg1);
 }
 
-export function OpenReportInBrowser(arg1) {
-  return window['go']['main']['App']['OpenReportInBrowser'](arg1);
-}
-
 export function Ping(arg1, arg2, arg3) {
   return window['go']['main']['App']['Ping'](arg1, arg2, arg3);
 }
 
 export function PortScan(arg1, arg2) {
   return window['go']['main']['App']['PortScan'](arg1, arg2);
+}
+
+export function PreviewFile(arg1) {
+  return window['go']['main']['App']['PreviewFile'](arg1);
 }
 
 export function PreviewOrganize(arg1, arg2) {
@@ -382,12 +442,20 @@ export function QueryGeoIP(arg1) {
   return window['go']['main']['App']['QueryGeoIP'](arg1);
 }
 
+export function ReadClipboardImage() {
+  return window['go']['main']['App']['ReadClipboardImage']();
+}
+
 export function ReadFileAsBase64(arg1) {
   return window['go']['main']['App']['ReadFileAsBase64'](arg1);
 }
 
 export function ReleaseIP() {
   return window['go']['main']['App']['ReleaseIP']();
+}
+
+export function RemoveBrowserExtension(arg1, arg2) {
+  return window['go']['main']['App']['RemoveBrowserExtension'](arg1, arg2);
 }
 
 export function RemoveClipboardItem(arg1) {
@@ -418,8 +486,16 @@ export function RestoreService(arg1) {
   return window['go']['main']['App']['RestoreService'](arg1);
 }
 
+export function RunExternalTool(arg1) {
+  return window['go']['main']['App']['RunExternalTool'](arg1);
+}
+
 export function RunHealthCheck() {
   return window['go']['main']['App']['RunHealthCheck']();
+}
+
+export function SaveClipboardImage(arg1) {
+  return window['go']['main']['App']['SaveClipboardImage'](arg1);
 }
 
 export function SaveConfig(arg1) {
@@ -474,6 +550,14 @@ export function SetPowerPlan(arg1) {
   return window['go']['main']['App']['SetPowerPlan'](arg1);
 }
 
+export function SetProcessPriority(arg1, arg2) {
+  return window['go']['main']['App']['SetProcessPriority'](arg1, arg2);
+}
+
+export function SetStartupItemDelay(arg1, arg2) {
+  return window['go']['main']['App']['SetStartupItemDelay'](arg1, arg2);
+}
+
 export function ShredDir(arg1, arg2) {
   return window['go']['main']['App']['ShredDir'](arg1, arg2);
 }
@@ -492,6 +576,10 @@ export function ToggleStartupItem(arg1, arg2) {
 
 export function UninstallContextMenu() {
   return window['go']['main']['App']['UninstallContextMenu']();
+}
+
+export function UninstallSoftware(arg1) {
+  return window['go']['main']['App']['UninstallSoftware'](arg1);
 }
 
 export function UploadFileToServer(arg1, arg2, arg3, arg4) {

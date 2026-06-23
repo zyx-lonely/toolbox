@@ -2,7 +2,9 @@ package common
 
 import (
 	"os"
+	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // Platform 平台抽象接口
@@ -26,8 +28,12 @@ func (p *DefaultPlatform) GetArchitecture() string {
 }
 
 func (p *DefaultPlatform) IsAdmin() bool {
-	// Windows 下通过尝试打开特定安全对象判断
-	return false
+	if runtime.GOOS != "windows" {
+		return os.Getuid() == 0
+	}
+	cmd := exec.Command("net", "session")
+	err := cmd.Run()
+	return err == nil
 }
 
 func (p *DefaultPlatform) GetTempDir() string {
@@ -40,4 +46,14 @@ func (p *DefaultPlatform) GetUserHomeDir() string {
 		return "."
 	}
 	return home
+}
+
+// Contains 检查字符串切片是否包含指定字符串
+func Contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if strings.EqualFold(s, item) {
+			return true
+		}
+	}
+	return false
 }

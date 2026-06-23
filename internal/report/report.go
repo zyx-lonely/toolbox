@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"syscall"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"syscall"
 	"time"
 )
 
@@ -274,9 +275,9 @@ func getWmicValue(class, action, field string) string {
 	if err != nil {
 		return ""
 	}
-	lines := splitLines(string(out))
+	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
-		line = trimSpace(line)
+		line = strings.TrimSpace(line)
 		if line != "" && !containsField(line, field) {
 			return line
 		}
@@ -285,8 +286,8 @@ func getWmicValue(class, action, field string) string {
 }
 
 func containsField(s, field string) bool {
-	clean := stringsReplaceAll(s, " ", "")
-	cleanF := stringsReplaceAll(field, " ", "")
+	clean := strings.ReplaceAll(s, " ", "")
+	cleanF := strings.ReplaceAll(field, " ", "")
 	return clean == cleanF
 }
 
@@ -298,15 +299,15 @@ func getUptime() string {
 	if err != nil {
 		return "未知"
 	}
-	return trimSpace(string(out))
+	return strings.TrimSpace(string(out))
 }
 
 func getTotalMemory() uint64 {
 	cmd := exec.Command("wmic", "ComputerSystem", "get", "TotalPhysicalMemory"); cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}; out, _ := cmd.Output()
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	lines := splitLines(string(out))
+	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
-		line = trimSpace(line)
+		line = strings.TrimSpace(line)
 		if line == "" || line == "TotalPhysicalMemory" {
 			continue
 		}
@@ -321,9 +322,9 @@ func getTotalMemory() uint64 {
 func getAvailableMemory() uint64 {
 	cmd := exec.Command("wmic", "OS", "get", "FreePhysicalMemory"); cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}; out, _ := cmd.Output()
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	lines := splitLines(string(out))
+	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
-		line = trimSpace(line)
+		line = strings.TrimSpace(line)
 		if line == "" || line == "FreePhysicalMemory" {
 			continue
 		}
@@ -339,20 +340,20 @@ func getDiskInfo() []DiskInfo {
 	cmd := exec.Command("wmic", "logicaldisk", "get", "DeviceID,FileSystem,Size,FreeSpace", "/format:csv"); cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}; out, _ := cmd.Output()
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	var disks []DiskInfo
-	lines := splitLines(string(out))
+	lines := strings.Split(string(out), "\n")
 	for _, line := range lines[1:] { // skip header
-		line = trimSpace(line)
+		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
-		parts := stringsSplit(line, ",")
+		parts := strings.Split(line, ",")
 		if len(parts) < 5 {
 			continue
 		}
-		label := trimSpace(parts[1])    // DeviceID (C:)
-		fs := trimSpace(parts[2])       // FileSystem (NTFS)
-		totalStr := trimSpace(parts[3]) // Size
-		freeStr := trimSpace(parts[4])  // FreeSpace
+		label := strings.TrimSpace(parts[1])    // DeviceID (C:)
+		fs := strings.TrimSpace(parts[2])       // FileSystem (NTFS)
+		totalStr := strings.TrimSpace(parts[3]) // Size
+		freeStr := strings.TrimSpace(parts[4])  // FreeSpace
 		if label == "" {
 			continue
 		}
@@ -374,18 +375,18 @@ func getNetworkInfo() NetworkInfo {
 	cmd := exec.Command("wmic", "nic", "where", "NetEnabled=TRUE", "get", "Name,MACAddress", "/format:csv"); cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}; out, _ := cmd.Output()
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	var adapters []NetworkAdapter
-	lines := splitLines(string(out))
+	lines := strings.Split(string(out), "\n")
 	for _, line := range lines[1:] {
-		line = trimSpace(line)
+		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
-		parts := stringsSplit(line, ",")
+		parts := strings.Split(line, ",")
 		if len(parts) < 3 {
 			continue
 		}
-		name := trimSpace(parts[1])
-		mac := trimSpace(parts[2])
+		name := strings.TrimSpace(parts[1])
+		mac := strings.TrimSpace(parts[2])
 		if name != "" {
 			adapters = append(adapters, NetworkAdapter{
 				Name: name, Type: "以太网", IP: "-", MAC: mac,
@@ -395,66 +396,7 @@ func getNetworkInfo() NetworkInfo {
 	return NetworkInfo{Adapters: adapters}
 }
 
-// 避免 import "strings" 的工具函数
-func trimSpace(s string) string {
-	start, end := 0, len(s)
-	for start < end && (s[start] == ' ' || s[start] == '\t' || s[start] == '\r') {
-		start++
-	}
-	for end > start && (s[end-1] == ' ' || s[end-1] == '\t' || s[end-1] == '\r') {
-		end--
-	}
-	return s[start:end]
-}
-
-func splitLines(s string) []string {
-	var lines []string
-	cur := ""
-	for i := 0; i < len(s); i++ {
-		if s[i] == '\n' {
-			lines = append(lines, cur)
-			cur = ""
-		} else {
-			cur += string(s[i])
-		}
-	}
-	if cur != "" {
-		lines = append(lines, cur)
-	}
-	return lines
-}
-
-func stringsSplit(s, sep string) []string {
-	var parts []string
-	cur := ""
-	for i := 0; i < len(s); {
-		if i+len(sep) <= len(s) && s[i:i+len(sep)] == sep {
-			parts = append(parts, cur)
-			cur = ""
-			i += len(sep)
-		} else {
-			cur += string(s[i])
-			i++
-		}
-	}
-	parts = append(parts, cur)
-	return parts
-}
-
-func stringsReplaceAll(s, old, new string) string {
-	var result string
-	for i := 0; i < len(s); {
-		if i+len(old) <= len(s) && s[i:i+len(old)] == old {
-			result += new
-			i += len(old)
-		} else {
-			result += string(s[i])
-			i++
-		}
-	}
-	return result
-}
-
+// formatBytes 格式化字节数为人类可读格式
 func formatBytes(bytes uint64) string {
 	units := []string{"B", "KB", "MB", "GB", "TB"}
 	val := float64(bytes)

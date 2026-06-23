@@ -24,7 +24,7 @@ func ExpandEnv(path string) string {
 		} else if key == "WINDIR" {
 			result = result[:start] + os.Getenv("SystemRoot") + result[start+1+end+1:]
 		} else {
-			// 环境变量不存在，保留原样
+			// 环境变量不存在，移除占位符避免路径中出现空段
 			result = result[:start] + result[start+1+end+1:]
 		}
 	}

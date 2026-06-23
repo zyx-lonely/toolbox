@@ -3,6 +3,7 @@ package optimize
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 	"strings"
 
@@ -18,7 +19,7 @@ type HostsEntry struct {
 	Line     string `json:"line,omitempty"`
 }
 
-const hostsFilePath = `C:\Windows\System32\drivers\etc\hosts`
+var hostsFilePath = filepath.Join(os.Getenv("SystemRoot"), "System32", "drivers", "etc", "hosts")
 
 // GetHostsEntries 读取 hosts 文件所有条目
 func GetHostsEntries() ([]HostsEntry, error) {

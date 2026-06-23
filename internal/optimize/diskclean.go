@@ -1,6 +1,7 @@
 package optimize
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -98,15 +99,24 @@ func scanSinglePath(t CleanupTarget) CleanupTarget {
 		}
 	}
 
-	// 使用 WalkDir（更高效）+ 超时管道
-	done := make(chan struct{})
+	// 使用 WalkDir + context 超时保护，防止 goroutine 泄漏
 	count := 0
 	var totalSize uint64
 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var scanWG sync.WaitGroup
+	scanWG.Add(1)
 	go func() {
+		defer scanWG.Done()
 		// 限制扫描文件数量以提高性能
 		const maxFiles = 5000
 		filepath.WalkDir(expanded, func(p string, d fs.DirEntry, err error) error {
+			// 检查是否已超时
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
 			if err != nil {
 				if os.IsPermission(err) {
 					return fs.SkipDir
@@ -125,14 +135,9 @@ func scanSinglePath(t CleanupTarget) CleanupTarget {
 			}
 			return nil
 		})
-		close(done)
 	}()
 
-	// 30秒超时，防止卡死
-	select {
-	case <-done:
-	case <-time.After(30 * time.Second):
-	}
+	scanWG.Wait()
 
 	return CleanupTarget{
 		Path:        expanded,

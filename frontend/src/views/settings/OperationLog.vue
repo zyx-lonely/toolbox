@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const loading = ref(false)
 const logs = ref<any[]>([])
@@ -39,8 +39,16 @@ async function handleRefresh() {
   loading.value = true
   try {
     const result = await window.go.main.App.GetOperationLogs()
-    logs.value = result || []
-  } catch {
+    // 后端返回 APIResponse {success, data, error}，需要取 data
+    if (result && result.data) {
+      logs.value = result.data || []
+    } else if (Array.isArray(result)) {
+      logs.value = result
+    } else {
+      logs.value = []
+    }
+  } catch (e: any) {
+    console.error('获取操作日志失败:', e)
     logs.value = []
   } finally {
     loading.value = false
@@ -56,6 +64,10 @@ async function handleClear() {
     window.$message?.error('清空失败')
   }
 }
+
+onMounted(() => {
+  handleRefresh()
+})
 </script>
 
 <style scoped>

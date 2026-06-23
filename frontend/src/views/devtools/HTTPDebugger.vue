@@ -101,10 +101,10 @@ async function sendRequest() {
     if (parsedHeaders) {
       try { JSON.parse(parsedHeaders) } catch { parsedHeaders = null }
     }
-    const r = await SendHTTPRequest(method.value, url.value, parsedHeaders, body.value)
+    const r = await SendHTTPRequest({ URL: url.value, Method: method.value, Headers: parsedHeaders || '', Body: body.value })
     if (r) {
       result.value = r
-      message.success(`请求完成: ${r.status} ${r.statusText}`)
+      message.success(`请求完成: ${r.statusCode} ${r.statusText}`)
     }
   } catch (e: any) {
     message.error(String(e))

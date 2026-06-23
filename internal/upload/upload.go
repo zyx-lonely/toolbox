@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -19,6 +21,31 @@ type UploadResult struct {
 	StatusCode int    `json:"statusCode"`
 	Response   string `json:"response"`
 	Error      string `json:"error,omitempty"`
+}
+
+// validateURL 验证 URL 安全性，防止 SSRF
+func validateURL(rawURL string) error {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("无效 URL: %v", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return fmt.Errorf("仅支持 http/https 协议")
+	}
+	host := parsed.Hostname()
+	if host == "" {
+		return fmt.Errorf("URL 缺少主机名")
+	}
+	ips, err := net.LookupIP(host)
+	if err == nil {
+		for _, ip := range ips {
+			if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() ||
+				ip.IsUnspecified() || ip.To4() != nil && (ip.To4()[0] == 10 || ip.To4()[0] == 172) {
+				return fmt.Errorf("不允许访问内网地址: %s", host)
+			}
+		}
+	}
+	return nil
 }
 
 // UploadFileToServer 将 Base64 编码的文件上传到指定服务器
@@ -35,6 +62,10 @@ func UploadFileToServer(fileData string, fileName string, serverURL string, fiel
 	}
 	if fieldName == "" {
 		fieldName = "file"
+	}
+
+	if err := validateURL(serverURL); err != nil {
+		return UploadResult{Error: fmt.Sprintf("URL 验证失败: %v", err)}
 	}
 
 	// 解析 Base64 数据

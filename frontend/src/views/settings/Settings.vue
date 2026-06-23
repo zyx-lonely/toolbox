@@ -12,7 +12,7 @@
     <n-card title="版本信息" class="mb-4">
       <n-description-list label-placement="left" :column="1">
         <n-description-item label="应用名称">电脑工具箱</n-description-item>
-        <n-description-item label="版本">1.0.0 (Build 20260603)</n-description-item>
+        <n-description-item label="版本">{{ version }} (Build {{ buildDate }})</n-description-item>
         <n-description-item label="技术栈">Go + Wails v2 + Vue 3 + Naive UI</n-description-item>
         <n-description-item label="适用平台">Windows 10/11</n-description-item>
       </n-description-list>

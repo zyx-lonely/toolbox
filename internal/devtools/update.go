@@ -2,10 +2,10 @@ package devtools
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"time"
+
+	"pc-toolbox/internal/common"
 )
 
 // ReleaseInfo GitHub 发布信息
@@ -23,18 +23,24 @@ type ReleaseInfo struct {
 func CheckUpdate(currentVersion string) ReleaseInfo {
 	url := "https://api.github.com/repos/user/pc-toolbox/releases/latest"
 
-	client := &http.Client{Timeout: 10 * time.Second}
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return ReleaseInfo{TagName: currentVersion}
+	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "pc-toolbox/"+currentVersion)
 
-	resp, err := client.Do(req)
+	resp, err := common.DefaultHTTPClient.Do(req)
 	if err != nil {
 		return ReleaseInfo{TagName: currentVersion}
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return ReleaseInfo{TagName: currentVersion}
+	}
+
 	var release ReleaseInfo
 	if err := json.Unmarshal(body, &release); err != nil {
 		return ReleaseInfo{TagName: currentVersion}
@@ -42,5 +48,3 @@ func CheckUpdate(currentVersion string) ReleaseInfo {
 
 	return release
 }
-
-var _ = fmt.Sprintf

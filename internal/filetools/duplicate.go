@@ -1,16 +1,11 @@
 package filetools
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
-	"fmt"
-	"hash"
-	"io"
 	"os"
 	"path/filepath"
+	"sync"
+
+	"pc-toolbox/internal/common"
 )
 
 // FileMatch 文件匹配信息（用于重复文件检测）
@@ -24,10 +19,10 @@ type FileMatch struct {
 
 // DuplicateGroup 重复文件组
 type DuplicateGroup struct {
-	Hash      string       `json:"hash"`
-	FileCount int          `json:"fileCount"`
-	TotalSize uint64       `json:"totalSize"`
-	Files     []FileMatch  `json:"files"`
+	Hash      string      `json:"hash"`
+	FileCount int         `json:"fileCount"`
+	TotalSize uint64      `json:"totalSize"`
+	Files     []FileMatch `json:"files"`
 }
 
 // FindDuplicates 查找重复文件
@@ -51,6 +46,12 @@ func FindDuplicates(rootPath string, mode string) ([]DuplicateGroup, error) {
 
 	// 第二阶段：过滤出有重复大小的组，计算哈希
 	var groups []DuplicateGroup
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	// 并发限制
+	sem := make(chan struct{}, 10)
+
 	for size, paths := range sizeMap {
 		if len(paths) < 2 {
 			continue
@@ -65,24 +66,41 @@ func FindDuplicates(rootPath string, mode string) ([]DuplicateGroup, error) {
 			continue
 		}
 
-		// 精确模式：按哈希分组
+		// 精确模式：按哈希分组（并发计算）
 		hashMap := make(map[string][]FileMatch)
+		var hashMapMu sync.Mutex
+
 		for _, path := range paths {
-			h, err := computeFileHash(path, "md5")
-			if err != nil {
-				continue
-			}
+			wg.Add(1)
+			go func(p string) {
+				defer wg.Done()
+				sem <- struct{}{}
+				defer func() { <-sem }()
 
-			info, _ := os.Stat(path)
-			hashMap[h] = append(hashMap[h], FileMatch{
-				Size:      size,
-				ModTime:   info.ModTime().Format("2006-01-02 15:04:05"),
-				Path:      path,
-				Hash:      h,
-				MatchType: "exact",
-			})
+				h, _, err := common.ComputeFileHash(p, "md5")
+				if err != nil {
+					return
+				}
+
+				info, err := os.Stat(p)
+				if err != nil {
+					return
+				}
+
+				hashMapMu.Lock()
+				hashMap[h] = append(hashMap[h], FileMatch{
+					Size:      size,
+					ModTime:   info.ModTime().Format("2006-01-02 15:04:05"),
+					Path:      p,
+					Hash:      h,
+					MatchType: "exact",
+				})
+				hashMapMu.Unlock()
+			}(path)
 		}
+		wg.Wait()
 
+		mu.Lock()
 		for h, files := range hashMap {
 			if len(files) >= 2 {
 				groups = append(groups, DuplicateGroup{
@@ -93,6 +111,7 @@ func FindDuplicates(rootPath string, mode string) ([]DuplicateGroup, error) {
 				})
 			}
 		}
+		mu.Unlock()
 	}
 
 	return groups, nil
@@ -100,35 +119,8 @@ func FindDuplicates(rootPath string, mode string) ([]DuplicateGroup, error) {
 
 // ComputeFileHash 计算文件哈希
 func ComputeFileHash(path string, algorithm string) (string, error) {
-	return computeFileHash(path, algorithm)
-}
-
-func computeFileHash(path string, algorithm string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	var h hash.Hash
-	switch algorithm {
-	case "md5":
-		h = md5.New()
-	case "sha1":
-		h = sha1.New()
-	case "sha256":
-		h = sha256.New()
-	case "sha512":
-		h = sha512.New()
-	default:
-		return "", fmt.Errorf("不支持的哈希算法: %s", algorithm)
-	}
-
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
+	h, _, err := common.ComputeFileHash(path, algorithm)
+	return h, err
 }
 
 func pathsToFileMatches(paths []string, size int64) []FileMatch {

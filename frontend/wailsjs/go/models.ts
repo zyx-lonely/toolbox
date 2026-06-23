@@ -73,33 +73,24 @@ export namespace browser {
 
 }
 
-export namespace clipboard {
+export namespace common {
 	
-	export class ClipItem {
-	    id: number;
-	    content: string;
-	    type: string;
-	    time: string;
-	    size: number;
+	export class APIResponse {
+	    success: boolean;
+	    data?: any;
+	    error?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new ClipItem(source);
+	        return new APIResponse(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.content = source["content"];
-	        this.type = source["type"];
-	        this.time = source["time"];
-	        this.size = source["size"];
+	        this.success = source["success"];
+	        this.data = source["data"];
+	        this.error = source["error"];
 	    }
 	}
-
-}
-
-export namespace common {
-	
 	export class AppConfig {
 	    theme: string;
 	    language: string;
@@ -551,6 +542,38 @@ export namespace filetools {
 	    }
 	}
 	
+	export class FilePreviewResult {
+	    path: string;
+	    name: string;
+	    size: number;
+	    isText: boolean;
+	    isImage: boolean;
+	    contentType: string;
+	    textContent?: string;
+	    imageBase64?: string;
+	    error?: string;
+	    truncated?: boolean;
+	    totalLines?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new FilePreviewResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	        this.size = source["size"];
+	        this.isText = source["isText"];
+	        this.isImage = source["isImage"];
+	        this.contentType = source["contentType"];
+	        this.textContent = source["textContent"];
+	        this.imageBase64 = source["imageBase64"];
+	        this.error = source["error"];
+	        this.truncated = source["truncated"];
+	        this.totalLines = source["totalLines"];
+	    }
+	}
 	export class FolderSize {
 	    path: string;
 	    name: string;
@@ -1305,6 +1328,7 @@ export namespace optimize {
 	    publisher: string;
 	    enabled: boolean;
 	    impact: string;
+	    delay: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new StartupItem(source);
@@ -1318,6 +1342,7 @@ export namespace optimize {
 	        this.publisher = source["publisher"];
 	        this.enabled = source["enabled"];
 	        this.impact = source["impact"];
+	        this.delay = source["delay"];
 	    }
 	}
 	export class UpdateInfo {
@@ -1368,179 +1393,6 @@ export namespace process {
 	        this.user = source["user"];
 	        this.command = source["command"];
 	    }
-	}
-
-}
-
-export namespace report {
-	
-	export class CPUInfo {
-	    name: string;
-	    cores: number;
-	    logicalCores: number;
-	    baseClock: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new CPUInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.cores = source["cores"];
-	        this.logicalCores = source["logicalCores"];
-	        this.baseClock = source["baseClock"];
-	    }
-	}
-	export class DiskInfo {
-	    label: string;
-	    fileSystem: string;
-	    total: number;
-	    free: number;
-	    usage: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new DiskInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.label = source["label"];
-	        this.fileSystem = source["fileSystem"];
-	        this.total = source["total"];
-	        this.free = source["free"];
-	        this.usage = source["usage"];
-	    }
-	}
-	export class MemInfo {
-	    total: number;
-	    available: number;
-	    usage: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new MemInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.total = source["total"];
-	        this.available = source["available"];
-	        this.usage = source["usage"];
-	    }
-	}
-	export class NetworkAdapter {
-	    name: string;
-	    ip: string;
-	    mac: string;
-	    type: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new NetworkAdapter(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.ip = source["ip"];
-	        this.mac = source["mac"];
-	        this.type = source["type"];
-	    }
-	}
-	export class NetworkInfo {
-	    adapters: NetworkAdapter[];
-	
-	    static createFrom(source: any = {}) {
-	        return new NetworkInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.adapters = this.convertValues(source["adapters"], NetworkAdapter);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class OSInfo {
-	    name: string;
-	    version: string;
-	    buildNumber: string;
-	    architecture: string;
-	    uptime: string;
-	    hostname: string;
-	    userName: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new OSInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.version = source["version"];
-	        this.buildNumber = source["buildNumber"];
-	        this.architecture = source["architecture"];
-	        this.uptime = source["uptime"];
-	        this.hostname = source["hostname"];
-	        this.userName = source["userName"];
-	    }
-	}
-	export class SystemReport {
-	    generatedAt: string;
-	    os: OSInfo;
-	    cpu: CPUInfo;
-	    memory: MemInfo;
-	    disks: DiskInfo[];
-	    network: NetworkInfo;
-	    processCount: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new SystemReport(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.generatedAt = source["generatedAt"];
-	        this.os = this.convertValues(source["os"], OSInfo);
-	        this.cpu = this.convertValues(source["cpu"], CPUInfo);
-	        this.memory = this.convertValues(source["memory"], MemInfo);
-	        this.disks = this.convertValues(source["disks"], DiskInfo);
-	        this.network = this.convertValues(source["network"], NetworkInfo);
-	        this.processCount = source["processCount"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }
@@ -1660,6 +1512,43 @@ export namespace security {
 
 }
 
+export namespace software {
+	
+	export class SoftwareInfo {
+	    name: string;
+	    version: string;
+	    publisher: string;
+	    installDate: string;
+	    size: string;
+	    uninstall: string;
+	    registryKey: string;
+	    installLocation: string;
+	    quietUninstall: string;
+	    systemComponent: number;
+	    windowsInstaller: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SoftwareInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.version = source["version"];
+	        this.publisher = source["publisher"];
+	        this.installDate = source["installDate"];
+	        this.size = source["size"];
+	        this.uninstall = source["uninstall"];
+	        this.registryKey = source["registryKey"];
+	        this.installLocation = source["installLocation"];
+	        this.quietUninstall = source["quietUninstall"];
+	        this.systemComponent = source["systemComponent"];
+	        this.windowsInstaller = source["windowsInstaller"];
+	    }
+	}
+
+}
+
 export namespace system {
 	
 	export class ActivationInfo {
@@ -1696,6 +1585,30 @@ export namespace system {
 	        this.url = source["url"];
 	        this.openSource = source["openSource"];
 	        this.type = source["type"];
+	    }
+	}
+	export class BrowserExtension {
+	    name: string;
+	    version: string;
+	    description: string;
+	    path: string;
+	    browser: string;
+	    enabled: boolean;
+	    id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BrowserExtension(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.version = source["version"];
+	        this.description = source["description"];
+	        this.path = source["path"];
+	        this.browser = source["browser"];
+	        this.enabled = source["enabled"];
+	        this.id = source["id"];
 	    }
 	}
 	export class CPUInfo {
@@ -1894,6 +1807,34 @@ export namespace system {
 	        this.active = source["active"];
 	    }
 	}
+	export class ShortcutKey {
+	    id: number;
+	    name: string;
+	    modifiers: string;
+	    key: string;
+	    fullPath: string;
+	    appPath: string;
+	    appName: string;
+	    enabled: boolean;
+	    source: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShortcutKey(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.modifiers = source["modifiers"];
+	        this.key = source["key"];
+	        this.fullPath = source["fullPath"];
+	        this.appPath = source["appPath"];
+	        this.appName = source["appName"];
+	        this.enabled = source["enabled"];
+	        this.source = source["source"];
+	    }
+	}
 	export class SystemInfo {
 	    os: OSInfo;
 	    cpu: CPUInfo;
@@ -1931,6 +1872,22 @@ export namespace system {
 		    }
 		    return a;
 		}
+	}
+	export class TemperatureInfo {
+	    name: string;
+	    temperature: number;
+	    unit: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemperatureInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.temperature = source["temperature"];
+	        this.unit = source["unit"];
+	    }
 	}
 
 }

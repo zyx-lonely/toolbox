@@ -54,11 +54,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h } from 'vue'
+import { ref } from 'vue'
 import { useMessage } from 'naive-ui'
-import { CollectReport, GenerateHTMLReport, OpenReportInBrowser } from '@wails/go/main/App'
+import { GenerateSystemReport } from '@wails/go/main/App'
 import { formatBytes } from '@/api/bridge'
-import { NProgress } from 'naive-ui'
 
 const report = ref<any>(null)
 const reportPath = ref('')
@@ -80,11 +79,7 @@ const diskColumns = [
     title: '使用率', key: 'usage', width: 150,
     render: (row: any) => {
       const pct = Math.round(row.usage || 0)
-      return h(NProgress, {
-        type: pct > 90 ? 'error' as const : pct > 75 ? 'warning' as const : 'success' as const,
-        value: pct,
-        height: 16
-      })
+      return `${pct}%`
     }
   }
 ]
@@ -92,31 +87,19 @@ const diskColumns = [
 async function generateReport() {
   generating.value = true
   try {
-    const r = await CollectReport()
-    if (r) report.value = r
-    const path = await GenerateHTMLReport()
-    if (path) {
-      reportPath.value = path as string
+    const r = await GenerateSystemReport("system")
+    if (r) {
+      reportPath.value = r as string
       message.success('报告已生成')
+      // 自动打开报告
+      window.open('file://' + r)
     }
-  } catch (e: any) { message.error(`生成失败: ${e}`) }
+  } catch (e: any) { 
+    message.error(`生成失败: ${e}`) 
+  }
   generating.value = false
 }
 
-async function openReport() {
-  if (!reportPath.value) return
-  try {
-    await OpenReportInBrowser(reportPath.value)
-  } catch (e) { console.error(e) }
-}
-
-async function copyPath() {
-  if (!reportPath.value) return
-  try {
-    await navigator.clipboard.writeText(reportPath.value)
-    message.success('路径已复制')
-  } catch { message.warning('复制失败') }
-}
 </script>
 
 <style scoped>

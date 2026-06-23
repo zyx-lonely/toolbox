@@ -1,16 +1,10 @@
 package filetools
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
-	"fmt"
-	"hash"
-	"io"
 	"os"
 	"path/filepath"
+
+	"pc-toolbox/internal/common"
 )
 
 // HashResult 哈希计算结果
@@ -24,36 +18,15 @@ type HashResult struct {
 
 // ComputeHash 计算单个文件哈希
 func ComputeHash(path string, algorithm string) (*HashResult, error) {
-	f, err := os.Open(path)
+	hashVal, size, err := common.ComputeFileHash(path, algorithm)
 	if err != nil {
-		return nil, fmt.Errorf("打开文件失败: %w", err)
+		return nil, err
 	}
-	defer f.Close()
-
-	var h hash.Hash
-	switch algorithm {
-	case "md5":
-		h = md5.New()
-	case "sha1":
-		h = sha1.New()
-	case "sha256":
-		h = sha256.New()
-	case "sha512":
-		h = sha512.New()
-	default:
-		return nil, fmt.Errorf("不支持的算法: %s", algorithm)
-	}
-
-	if _, err := io.Copy(h, f); err != nil {
-		return nil, fmt.Errorf("计算哈希失败: %w", err)
-	}
-
-	info, _ := os.Stat(path)
 	return &HashResult{
 		Path:      path,
 		Algorithm: algorithm,
-		Hash:      hex.EncodeToString(h.Sum(nil)),
-		FileSize:  info.Size(),
+		Hash:      hashVal,
+		FileSize:  size,
 	}, nil
 }
 

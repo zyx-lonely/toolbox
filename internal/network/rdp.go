@@ -2,9 +2,9 @@ package network
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"syscall"
-	"strings"
 )
 
 // RemoteDesktopInfo 远程桌面信息
@@ -57,14 +57,9 @@ func checkPort(ip string, port int) bool {
 }
 
 func osTempDir() string {
-	c := exec.Command("cmd", "/c", "echo", "%TEMP%")
-	c.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	dir, _ := c.Output()
-	return strings.TrimSpace(string(dir))
+	return os.TempDir()
 }
 
 func writeFile(path, content string) error {
-	c := exec.Command("cmd", "/c", "echo", content, ">", path)
-	c.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	return c.Run()
+	return os.WriteFile(path, []byte(content), 0600)
 }

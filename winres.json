@@ -1,0 +1,10 @@
+{
+  "RT_GROUP_ICON": {
+    "APP": {
+      "0": [
+        "build/windows/icon.ico"
+      ]
+    }
+  },
+  "RT_MANIFEST": {}
+}

@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+  base: './',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -12,6 +13,15 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'naive-ui': ['naive-ui'],
+          'echarts': ['echarts', 'vue-echarts'],
+          'vendor': ['vue', 'vue-router', 'pinia']
+        }
+      }
+    }
   }
 })

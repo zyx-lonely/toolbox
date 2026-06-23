@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Bulk Crap Uninstaller",
+    "description": "强大的软件卸载工具，可以彻底卸载软件并清理残留",
+    "executable": "BCU.exe",
+    "args": "",
+    "workingDir": "",
+    "icon": "apps-outline",
+    "category": "卸载工具"
+  }
+]
