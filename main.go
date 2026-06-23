@@ -19,10 +19,10 @@ import (
 var assets embed.FS
 
 // AppVersion 应用版本号
-const AppVersion = "1.5.0"
+const AppVersion = "1.0.1"
 
 // BuildDate 构建日期
-const BuildDate = "20260622"
+const BuildDate = "20260623"
 
 func main() {
 	// 初始化日志系统
