@@ -1,19 +1,68 @@
-# README
+# PC Toolbox - 鐢佃剳宸ュ叿绠?
+涓€娆惧熀浜?Wails (Go + Vue 3) 寮€鍙戠殑 Windows 绯荤粺宸ュ叿绠憋紝闆嗘垚 80+ 瀹炵敤鍔熻兘銆?
+## 鍔熻兘妯″潡
 
-## About
+### 绯荤粺宸ュ叿
+- 绯荤粺淇℃伅 / 纭欢妫€娴嬫姤鍛?/ 娓╁害鐩戞帶
+- 杩涚▼绠＄悊鍣?/ 鐢垫簮鏂规 / 娴忚鍣ㄦ墿灞?- 蹇嵎閿鐞?/ 绯荤粺婵€娲?/ 瀵煎嚭鎶ュ憡
 
-This is the official Wails Vue-TS template.
+### Windows 浼樺寲
+- 纾佺洏娓呯悊 / 鍚姩椤圭鐞?/ 绯荤粺鏈嶅姟浼樺寲
+- 绯荤粺鍋ュ悍浣撴 / 绯荤粺澶囦唤涓庤繕鍘?/ 娉ㄥ唽琛ㄦ竻鐞?- 娴忚鍣ㄦ暟鎹鐞?/ Windows 鏇存柊绠＄悊 / 鐜鍙橀噺绠＄悊
+- 纾佺洏鍋ュ悍鐩戞帶 / 鏈嶅姟渚濊禆鍒嗘瀽 / 鏂囦欢鍏宠仈绠＄悊
+- **杞欢绠＄悊** - 鍩轰簬 Windows Registry API 鑾峰彇宸插畨瑁呰蒋浠跺垪琛?
+### 澶栭儴宸ュ叿
+- **澶栭儴宸ュ叿绠＄悊** - 鏀寔 ShellExecute runas 鎻愭潈鍚姩澶栭儴宸ュ叿
+- 绯荤粺蹇呭杞欢
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+### 缃戠粶宸ュ叿
+- 缃戠粶璇婃柇 / Hosts 缂栬緫鍣?/ IP 鍦扮悊浣嶇疆
+- 灞€鍩熺綉鎵弿 / WiFi 瀵嗙爜 / WiFi 鎵弿
+- IP 鍐茬獊妫€娴?/ 灞€鍩熺綉鎷撴墤 / 鎵归噺 Ping
+- 娴侀噺鍥捐〃 / 杩滅▼妗岄潰 / 绔彛鍗犵敤鏌ヨ
+- DNS 鍒囨崲 / IP 瀛愮綉璁＄畻鍣?/ 缃戦€熸祴璇?
+### 鏂囦欢宸ュ叿
+- 閲嶅鏂囦欢鏌ユ壘 / 澶ф枃浠舵煡鎵?/ **鏂囦欢棰勮**
+- 鍥剧墖鏍煎紡杞崲 / 鍥剧墖鎵归噺鍘嬬缉 / 鏂囨湰缂栫爜杞崲
+- 鏂囦欢鍝堝笇鏍￠獙 / 鏂囦欢鍐呭鎼滅储 / 鏂囦欢鍐呭鏇挎崲
+- 鏂囦欢澶瑰ぇ灏忓垎鏋?/ 鏂囦欢宸紓瀵规瘮 / PDF 宸ュ叿
+- 鎵归噺閲嶅懡鍚?/ 鏂囦欢鎵归噺褰掔被 / 鏂囦欢瑙ｉ攣鍣?- 鏂囦欢鏃堕棿鎴充慨鏀?/ 鎵归噺姝ｅ垯閲嶅懡鍚?
+### 寮€鍙戝伐鍏?- JSON 鏍煎紡鍖?/ 缂栬В鐮佸伐鍏?/ 浠ｇ爜缇庡寲
+- HTTP 璋冭瘯 / 姝ｅ垯娴嬭瘯 / JWT 瑙ｇ爜
+- YAML/TOML / UUID 鐢熸垚 / Markdown 棰勮
+- 浜岀淮鐮佺敓鎴?/ Cron 鐢熸垚鍣?/ 鏂囨湰瀵规瘮
+- 鏂囨湰瀛楁暟缁熻 / JSON/CSV 浜掕浆
 
-## Live Development
+### 瀹夊叏宸ュ叿
+- 鏂囦欢鍔犲瘑瑙ｅ瘑 / 瀵嗙爜鐢熸垚鍣?/ 鏂囦欢绮夌
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+### 鏃ュ父宸ュ叿
+- 鍗曚綅鎹㈢畻 / 鍙栬壊鍣?/ 鎴睆宸ュ叿
+- 鐣寗鏃堕挓 / **鍓创鏉垮巻鍙诧紙鏀寔鍥剧墖锛?* / 瀹氭椂浠诲姟
+- 渚跨 / 鎻愰啋浜嬮」 / **灞忓箷鏍囧昂**
 
-## Building
+### 璁剧疆
+- 搴旂敤璁剧疆 / 鍙抽敭鑿滃崟 / 妫€鏌ユ洿鏂?/ 涓婚鍟嗗簵 / 鎿嶄綔鏃ュ織
 
-To build a redistributable, production mode package, use `wails build`.
+## 鎶€鏈爤
+
+- **鍚庣**: Go + Wails v2
+- **鍓嶇**: Vue 3 + TypeScript + Naive UI + Pinia
+- **鏋勫缓**: Vite
+
+## 寮€鍙?
+```bash
+# 瀹夎渚濊禆
+cd frontend && npm install
+
+# 寮€鍙戞ā寮?wails dev
+
+# 鐢熶骇鏋勫缓
+wails build
+```
+
+## 鏋勫缓浜х墿
+
+鏋勫缓瀹屾垚鍚庯紝鍙墽琛屾枃浠朵綅浜?`build/bin/pc-toolbox.exe`銆?
+## 璁稿彲璇?
+MIT License
