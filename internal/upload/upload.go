@@ -36,13 +36,16 @@ func validateURL(rawURL string) error {
 	if host == "" {
 		return fmt.Errorf("URL 缺少主机名")
 	}
+
+	// 解析主机名，检查是否为内网地址
 	ips, err := net.LookupIP(host)
-	if err == nil {
-		for _, ip := range ips {
-			if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() ||
-				ip.IsUnspecified() || ip.To4() != nil && (ip.To4()[0] == 10 || ip.To4()[0] == 172) {
-				return fmt.Errorf("不允许访问内网地址: %s", host)
-			}
+	if err != nil {
+		return fmt.Errorf("无法解析主机名: %v", err)
+	}
+	for _, ip := range ips {
+		if ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() ||
+			ip.IsLinkLocalMulticast() || ip.IsUnspecified() {
+			return fmt.Errorf("不允许访问内网地址: %s", host)
 		}
 	}
 	return nil

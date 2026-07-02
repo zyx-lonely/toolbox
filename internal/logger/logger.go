@@ -29,6 +29,7 @@ type Logger struct {
 var (
 	defaultLogger *Logger
 	once          sync.Once
+	initMu        sync.Mutex
 )
 
 // Init 初始化日志系统
@@ -93,6 +94,8 @@ func cleanOldLogs(logDir string, delayDays int) {
 
 // GetLogger 获取默认日志实例
 func GetLogger() *Logger {
+	initMu.Lock()
+	defer initMu.Unlock()
 	if defaultLogger == nil {
 		// 如果未初始化，创建一个控制台输出的 logger
 		defaultLogger = &Logger{
@@ -118,12 +121,12 @@ func (l *Logger) SetPrefix(prefix string) {
 }
 
 func (l *Logger) log(level Level, format string, args ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	if level < l.level {
 		return
 	}
-
-	l.mu.Lock()
-	defer l.mu.Unlock()
 
 	var levelStr string
 	switch level {

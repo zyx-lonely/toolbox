@@ -25,7 +25,11 @@ func GetDefaultConfigPath() string {
 		return filepath.Join(filepath.Dir(execPath), "config.json")
 	}
 	cfgDir := filepath.Join(appData, "pc-toolbox")
-	_ = os.MkdirAll(cfgDir, 0755)
+	if err := os.MkdirAll(cfgDir, 0755); err != nil {
+		// 目录创建失败，使用当前目录作为回退
+		logger.Warn("创建配置目录失败: %v", err)
+		return "config.json"
+	}
 	return filepath.Join(cfgDir, "config.json")
 }
 

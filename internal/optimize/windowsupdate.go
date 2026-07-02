@@ -1,5 +1,13 @@
 package optimize
 
+import (
+	"encoding/json"
+	"fmt"
+	"os/exec"
+	"strings"
+	"syscall"
+)
+
 // UpdateInfo Windows 更新信息
 type UpdateInfo struct {
 	Name       string `json:"name"`
@@ -7,6 +15,20 @@ type UpdateInfo struct {
 	Status     string `json:"status"`     // "installed", "pending", "failed"
 	InstallDate string `json:"installDate"`
 	Size       string `json:"size"`
+}
+
+// wuUpdateItem WMI 更新项
+type wuUpdateItem struct {
+	HotFixID    string `json:"HotFixID"`
+	Description string `json:"Description"`
+	InstalledOn string `json:"InstalledOn"`
+}
+
+// wuPendingItem 待安装更新项
+type wuPendingItem struct {
+	Title        string `json:"Title"`
+	KBArticleIDs string `json:"KBArticleIDs"`
+	Size         float64 `json:"Size"`
 }
 
 // GetWindowsUpdates 获取已安装的更新列表
@@ -42,16 +64,32 @@ func CheckForUpdates() string {
 func getWUUpdateList() []UpdateInfo {
 	var updates []UpdateInfo
 
-	// 使用 wmic qfe 获取已安装更新
 	output := runPowershellScript(`Get-WmiObject -Class Win32_QuickFixEngineering | Select-Object HotFixID, Description, InstalledOn | ConvertTo-Json`)
 
-	// 简化解析
-	if output != "" && len(output) > 10 {
+	if output == "" || output == "null" {
+		return updates
+	}
+
+	// 处理单条和数组两种情况
+	if !strings.HasPrefix(output, "[") {
+		output = "[" + output + "]"
+	}
+
+	var items []wuUpdateItem
+	if err := json.Unmarshal([]byte(output), &items); err != nil {
+		return updates
+	}
+
+	for _, item := range items {
+		kb := item.HotFixID
+		if !strings.HasPrefix(kb, "KB") {
+			kb = "KB" + kb
+		}
 		updates = append(updates, UpdateInfo{
-			Name:       "已安装更新",
-			KB:         "查看详情",
+			Name:       item.Description,
+			KB:         kb,
 			Status:     "installed",
-			InstallDate: "见控制面板",
+			InstallDate: item.InstalledOn,
 			Size:       "-",
 		})
 	}
@@ -60,18 +98,44 @@ func getWUUpdateList() []UpdateInfo {
 }
 
 func getWUPendingList() []UpdateInfo {
+	var updates []UpdateInfo
+
 	output := runPowershellScript(`$Session = New-Object -ComObject Microsoft.Update.Session; $Searcher = $Session.CreateUpdateSearcher(); $Result = $Searcher.Search("IsInstalled=0"); $Result.Updates | Select-Object Title, KBArticleIDs, Size | ConvertTo-Json`)
 
-	if len(output) < 10 {
-		return []UpdateInfo{}
+	if output == "" || output == "null" {
+		return updates
 	}
 
-	return []UpdateInfo{
-		{Name: "待安装更新", KB: "-", Status: "pending", InstallDate: "-", Size: "-"},
+	// 处理单条和数组两种情况
+	if !strings.HasPrefix(output, "[") {
+		output = "[" + output + "]"
 	}
+
+	var items []wuPendingItem
+	if err := json.Unmarshal([]byte(output), &items); err != nil {
+		return updates
+	}
+
+	for _, item := range items {
+		sizeMB := item.Size / 1024 / 1024
+		updates = append(updates, UpdateInfo{
+			Name:       item.Title,
+			KB:         item.KBArticleIDs,
+			Status:     "pending",
+			InstallDate: "-",
+			Size:       fmt.Sprintf("%.1f MB", sizeMB),
+		})
+	}
+
+	return updates
 }
 
 func runPowershellScript(script string) string {
-	// 简化实现，实际需要调用 PowerShell
-	return ""
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
 }

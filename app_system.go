@@ -74,4 +74,23 @@ func (a *App) RemoveBrowserExtension(browser string, extID string) common.APIRes
 	return system.RemoveBrowserExtension(browser, extID)
 }
 
+// ============================================================
+//  实时性能监控
+// ============================================================
+
+// GetPerfSnapshot 获取当前性能快照
+func (a *App) GetPerfSnapshot() system.PerfSnapshot {
+	return system.GetPerfSnapshot()
+}
+
+// GetPerfHistory 获取性能历史数据
+func (a *App) GetPerfHistory() []system.PerfSnapshot {
+	return system.GetPerfHistory()
+}
+
+// ClearPerfHistory 清空性能历史
+func (a *App) ClearPerfHistory() {
+	system.ClearPerfHistory()
+}
+
 

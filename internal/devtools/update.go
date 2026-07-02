@@ -19,9 +19,21 @@ type ReleaseInfo struct {
 	DownloadURL string `json:"download_url,omitempty"`
 }
 
+// GitHub 仓库配置
+var (
+	githubOwner = "user"
+	githubRepo  = "pc-toolbox"
+)
+
+// SetGitHubRepo 设置 GitHub 仓库信息
+func SetGitHubRepo(owner, repo string) {
+	githubOwner = owner
+	githubRepo = repo
+}
+
 // CheckUpdate 检查 GitHub Releases 更新
 func CheckUpdate(currentVersion string) ReleaseInfo {
-	url := "https://api.github.com/repos/user/pc-toolbox/releases/latest"
+	url := "https://api.github.com/repos/" + githubOwner + "/" + githubRepo + "/releases/latest"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

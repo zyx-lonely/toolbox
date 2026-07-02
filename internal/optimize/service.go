@@ -89,7 +89,9 @@ func RestoreService(name string) error {
 
 	// 恢复运行状态
 	if backup.Status == "running" {
-		s.Start()
+		if err := s.Start(); err != nil {
+			return fmt.Errorf("启动服务失败: %w", err)
+		}
 	}
 
 	return nil
@@ -212,7 +214,10 @@ func GetServices() ([]ServiceInfo, error) {
 func ChangeService(name string, action string) error {
 	// 备份服务原始配置（仅在修改启动类型时）
 	if action != "start" && action != "stop" && action != "restart" {
-		SaveServiceBackup(name)
+		if err := SaveServiceBackup(name); err != nil {
+			// 备份失败只记录警告，不阻止操作
+			fmt.Printf("警告: 备份服务配置失败: %v\n", err)
+		}
 	}
 
 	m, err := mgr.Connect()

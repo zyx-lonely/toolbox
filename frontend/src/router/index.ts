@@ -98,6 +98,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '文件关联管理', icon: 'document-attach-outline' }
       },
       {
+        path: 'optimize/cleanup',
+        name: 'CleanupScheduler',
+        component: () => import('../views/optimize/CleanupScheduler.vue'),
+        meta: { title: '自动清理调度', icon: 'timer-outline' }
+      },
+      {
         path: 'tools/external',
         name: 'ExternalTools',
         component: () => import('../views/tools/ExternalTools.vue'),
@@ -140,6 +146,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '温度监控', icon: 'thermometer-outline' }
       },
       {
+        path: 'system/battery',
+        name: 'BatteryInfo',
+        component: () => import('../views/system/BatteryInfo.vue'),
+        meta: { title: '电池信息', icon: 'battery-half-outline' }
+      },
+      {
         path: 'system/export',
         name: 'ReportExport',
         component: () => import('../views/system/ReportExport.vue'),
@@ -150,6 +162,12 @@ const routes: RouteRecordRaw[] = [
         name: 'BrowserExtensions',
         component: () => import('../views/system/BrowserExtensions.vue'),
         meta: { title: '浏览器扩展', icon: 'logo-chrome-outline' }
+      },
+      {
+        path: 'system/perfmon',
+        name: 'PerfMonitor',
+        component: () => import('../views/system/PerfMonitor.vue'),
+        meta: { title: '实时性能监控', icon: 'pulse-outline' }
       },
       {
         path: 'network',
@@ -183,7 +201,6 @@ const routes: RouteRecordRaw[] = [
       },
       { path: 'network/wifiscan', name: 'WiFiScan', component: () => import('../views/network/WiFiScan.vue'), meta: { title: 'WiFi 扫描' } },
       { path: 'network/ipconflict', name: 'IPConflict', component: () => import('../views/network/IPConflict.vue'), meta: { title: 'IP 冲突' } },
-      { path: 'network/topology', name: 'LANTopology', component: () => import('../views/network/LANTopology.vue'), meta: { title: '局域网拓扑' } },
       {
         path: 'network/rdp',
         name: 'RemoteDesktop',
@@ -225,6 +242,12 @@ const routes: RouteRecordRaw[] = [
         name: 'SpeedTest',
         component: () => import('../views/network/SpeedTest.vue'),
         meta: { title: '网速测试', icon: 'speedometer-outline' }
+      },
+      {
+        path: 'network/connections',
+        name: 'NetConnections',
+        component: () => import('../views/network/NetConnections.vue'),
+        meta: { title: '网络连接查看器', icon: 'list-outline' }
       },
       {
         path: 'file/duplicate',
@@ -446,6 +469,72 @@ const routes: RouteRecordRaw[] = [
         name: 'Reminder',
         component: () => import('../views/daily/Reminder.vue'),
         meta: { title: '提醒事项', icon: 'notifications-outline' }
+      },
+      {
+        path: 'daily/translate',
+        name: 'ClipboardTranslate',
+        component: () => import('../views/daily/ClipboardTranslate.vue'),
+        meta: { title: '剪贴板翻译', icon: 'language-outline' }
+      },
+      {
+        path: 'daily/exchange',
+        name: 'ExchangeRate',
+        component: () => import('../views/daily/ExchangeRate.vue'),
+        meta: { title: '汇率查询', icon: 'cash-outline' }
+      },
+      {
+        path: 'daily/calculator',
+        name: 'Calculator',
+        component: () => import('../views/daily/Calculator.vue'),
+        meta: { title: '科学计算器', icon: 'calculator-outline' }
+      },
+      {
+        path: 'daily/screenrec',
+        name: 'ScreenRecorder',
+        component: () => import('../views/daily/ScreenRecorder.vue'),
+        meta: { title: '屏幕录制', icon: 'videocam-outline' }
+      },
+      {
+        path: 'file/foldermonitor',
+        name: 'FolderMonitor',
+        component: () => import('../views/file/FolderMonitor.vue'),
+        meta: { title: '文件夹监控', icon: 'eye-outline' }
+      },
+      {
+        path: 'security/firewall',
+        name: 'FirewallManager',
+        component: () => import('../views/security/FirewallManager.vue'),
+        meta: { title: '防火墙管理', icon: 'shield-checkmark-outline' }
+      },
+      {
+        path: 'file/disktree',
+        name: 'DiskTree',
+        component: () => import('../views/file/DiskTree.vue'),
+        meta: { title: '磁盘空间树状图', icon: 'folder-open-outline' }
+      },
+      {
+        path: 'file/watermark',
+        name: 'ImageWatermark',
+        component: () => import('../views/file/ImageWatermark.vue'),
+        meta: { title: '图片批量加水印', icon: 'image-outline' }
+      },
+      {
+        path: 'devtools/codec-advanced',
+        name: 'CodecAdvanced',
+        component: () => import('../views/devtools/CodecAdvanced.vue'),
+        meta: { title: 'Base32/Hex 互转', icon: 'swap-horizontal-outline' }
+      },
+      {
+        path: 'devtools/timestamp',
+        name: 'TimestampConverter',
+        component: () => import('../views/devtools/TimestampConverter.vue'),
+        meta: { title: '时间戳转换', icon: 'time-outline' }
+      },
+      {
+        path: 'devtools/color',
+        name: 'ColorConverter',
+        component: () => import('../views/devtools/ColorConverter.vue'),
+        meta: { title: '颜色代码转换', icon: 'color-palette-outline' }
       },
 
       {

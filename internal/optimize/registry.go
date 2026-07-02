@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"golang.org/x/sys/windows/registry"
@@ -166,10 +167,57 @@ func FixRegistryItems(items []RegistryScanResult) []RegistryFixResult {
 	for _, item := range items {
 		result := RegistryFixResult{
 			Key:        item.Key,
-			Success:    false,
-			Error:      "需要管理员权限手动删除",
 			BackupPath: backupPath,
 		}
+
+		// 解析注册表路径
+		parts := strings.SplitN(item.Key, `\`, 2)
+		if len(parts) != 2 {
+			result.Success = false
+			result.Error = "无效的注册表路径格式"
+			results = append(results, result)
+			continue
+		}
+
+		var root registry.Key
+		switch parts[0] {
+		case "HKLM", "HKEY_LOCAL_MACHINE":
+			root = registry.LOCAL_MACHINE
+		case "HKCU", "HKEY_CURRENT_USER":
+			root = registry.CURRENT_USER
+		case "HKCR", "HKEY_CLASSES_ROOT":
+			root = registry.CLASSES_ROOT
+		default:
+			result.Success = false
+			result.Error = "不支持的注册表根键: " + parts[0]
+			results = append(results, result)
+			continue
+		}
+
+		keyPath := parts[1]
+		parentPath := filepath.Dir(keyPath)
+		keyName := filepath.Base(keyPath)
+
+		// 打开父键
+		parentKey, err := registry.OpenKey(root, parentPath, registry.WRITE)
+		if err != nil {
+			result.Success = false
+			result.Error = "打开父键失败: " + err.Error()
+			results = append(results, result)
+			continue
+		}
+
+		// 删除子键（递归）
+		err = deleteRegistryKeyTree(parentKey, keyName)
+		parentKey.Close()
+
+		if err != nil {
+			result.Success = false
+			result.Error = "删除注册表项失败: " + err.Error()
+		} else {
+			result.Success = true
+		}
+
 		results = append(results, result)
 	}
 
@@ -185,4 +233,28 @@ func createRegistryBackup() (string, error) {
 	backupFile := filepath.Join(backupDir,
 		fmt.Sprintf("registry_backup_%d.reg", time.Now().Unix()))
 	return backupFile, nil
+}
+
+// deleteRegistryKeyTree 递归删除注册表键树
+func deleteRegistryKeyTree(parent registry.Key, keyName string) error {
+	// 打开要删除的键
+	key, err := registry.OpenKey(parent, keyName, registry.READ|registry.WRITE)
+	if err != nil {
+		return err
+	}
+
+	// 获取所有子键
+	subKeys, _ := key.ReadSubKeyNames(1000)
+	key.Close()
+
+	// 递归删除子键
+	for _, sub := range subKeys {
+		if err := deleteRegistryKeyTree(parent, keyName+`\`+sub); err != nil {
+			// 忽略单个子键删除失败
+			continue
+		}
+	}
+
+	// 删除当前键
+	return parent.DeleteValue(keyName)
 }

@@ -144,7 +144,9 @@ func GetExternalTools() ([]ExternalTool, error) {
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		defaultTools := getDefaultTools()
-		saveToolsConfig(defaultTools)
+		if err := saveToolsConfig(defaultTools); err != nil {
+			logger.Warn("保存默认工具配置失败: %v", err)
+		}
 		return defaultTools, nil
 	}
 
@@ -217,7 +219,9 @@ func GetToolsDir() string {
 		return "tools"
 	}
 	toolsDir := filepath.Join(filepath.Dir(exePath), "tools")
-	os.MkdirAll(toolsDir, 0755)
+	if err := os.MkdirAll(toolsDir, 0755); err != nil {
+		logger.Warn("创建工具目录失败: %v", err)
+	}
 	return toolsDir
 }
 

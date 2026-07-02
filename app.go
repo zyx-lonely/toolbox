@@ -74,6 +74,11 @@ func (a *App) OpenExternalURL(url string) error {
 	return common.OpenURL(url)
 }
 
+// OpenDirectory 在资源管理器中打开目录
+func (a *App) OpenDirectory(path string) error {
+	return common.OpenURL(path)
+}
+
 // GetAppVersion 获取应用版本号
 func (a *App) GetAppVersion() string {
 	return AppVersion

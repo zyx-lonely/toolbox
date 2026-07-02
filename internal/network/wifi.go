@@ -34,8 +34,11 @@ func GetWiFiPasswords() []WiFiProfile {
 		return profiles
 	}
 
-	// 转换 GBK 到 UTF-8
-	output := common.GbkToUtf8(string(out))
+	// 检测编码：如果包含 "配置文件" 则已经是 UTF-8，否则尝试 GBK 转换
+	output := string(out)
+	if !strings.Contains(output, "配置文件") && !strings.Contains(output, "Profile") {
+		output = common.GbkToUtf8(output)
+	}
 	lines := strings.Split(output, "\n")
 
 	for _, line := range lines {
@@ -81,11 +84,13 @@ func getWiFiPassword(netshPath, ssid string) string {
 		return "需要管理员权限"
 	}
 
-	output := common.GbkToUtf8(string(out))
+	output := string(out)
+	if !strings.Contains(output, "关键内容") && !strings.Contains(output, "Key Content") {
+		output = common.GbkToUtf8(output)
+	}
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		// 匹配: "关键内容", "Key Content", "Contenu de la clé"
 		if containsAny(line, "关键内容", "Key Content", "Contenu") {
 			parts := strings.SplitN(line, ":", 2)
 			if len(parts) >= 2 {

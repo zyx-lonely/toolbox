@@ -283,16 +283,16 @@ func DNSLookup(hostname string) (*DNSResult, error) {
 	}, nil
 }
 
-// TraceRoute 路由追踪（简化实现）
+// TraceRoute 路由追踪
 func TraceRoute(host string, maxHops int) ([]PingResult, error) {
 	if maxHops <= 0 {
 		maxHops = 30
 	}
-	// 使用系统的 tracert 命令
+
 	tracertPath := filepath.Join(os.Getenv("SystemRoot"), "System32", "tracert.exe")
 	cmd := &exec.Cmd{
 		Path: tracertPath,
-		Args: []string{tracertPath, "-h", fmt.Sprintf("%d", maxHops), host},
+		Args: []string{tracertPath, "-d", "-h", fmt.Sprintf("%d", maxHops), host},
 		SysProcAttr: &syscall.SysProcAttr{HideWindow: true},
 	}
 	output, err := cmd.CombinedOutput()
@@ -300,98 +300,85 @@ func TraceRoute(host string, maxHops int) ([]PingResult, error) {
 		return nil, fmt.Errorf("tracert 执行失败: %w", err)
 	}
 
-	// 解析输出
 	lines := strings.Split(common.GbkToUtf8(string(output)), "\n")
 	var results []PingResult
-	for i, line := range lines {
-		if i < 3 || strings.TrimSpace(line) == "" {
+	hopNum := 0
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
 			continue
 		}
+
+		// 跳过头部和尾部
+		if strings.HasPrefix(line, "Tracing route") ||
+			strings.HasPrefix(line, "Over a maximum") ||
+			strings.HasPrefix(line, "Route complete") ||
+			strings.Contains(line, "请求超时") {
+			continue
+		}
+
+		// 解析每一跳: "  1    <1 ms    <1 ms    <1 ms  192.168.1.1"
+		// 或: "  5     *        *        *     请求超时。"
+		parts := strings.Fields(line)
+		if len(parts) < 2 {
+			continue
+		}
+
+		// 第一个字段是跳数
+		var hop int
+		if _, err := fmt.Sscanf(parts[0], "%d", &hop); err != nil {
+			continue
+		}
+		hopNum = hop
+
+		// 找到 IP 地址（最后一个字段，排除星号和超时）
+		ip := ""
+		latency := "*"
+		for i := 1; i < len(parts); i++ {
+			p := parts[i]
+			if p == "*" || strings.Contains(p, "ms") || p == "请求超时。" {
+				if strings.Contains(p, "ms") && latency == "*" {
+					latency = p
+				}
+				continue
+			}
+			// 检查是否是 IP 地址格式
+			if strings.Contains(p, ".") && len(p) >= 7 {
+				ip = p
+			}
+		}
+
+		if ip == "" {
+			ip = "*"
+		}
+
 		results = append(results, PingResult{
-			Target:  host,
-			Success: true,
-			Latency: fmt.Sprintf("hop %d", i-2),
+			Target:  ip,
+			Latency: latency,
+			Success: ip != "*",
 		})
 	}
 
+	_ = hopNum
 	return results, nil
 }
 
-// GetNetworkConnections 获取网络连接
+// GetNetworkConnections 获取网络连接（兼容旧接口）
 func GetNetworkConnections() ([]ConnectionInfo, error) {
-	// 使用 netstat 命令
-	netstatPath := filepath.Join(os.Getenv("SystemRoot"), "System32", "netstat.exe")
-	cmd := &exec.Cmd{
-		Path: netstatPath,
-		Args: []string{netstatPath, "-ano"},
-		SysProcAttr: &syscall.SysProcAttr{HideWindow: true},
-	}
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, err
-	}
-
-	var connections []ConnectionInfo
-	lines := strings.Split(common.GbkToUtf8(string(output)), "\n")
-	for _, line := range lines {
-		fields := strings.Fields(line)
-		if len(fields) < 5 {
-			continue
-		}
-
-		protocol := fields[0]
-		if protocol != "TCP" && protocol != "UDP" {
-			continue
-		}
-
-		localAddr := parseAddr(fields[1])
-		remoteAddr := parseAddr(fields[2])
-		state := ""
-		pid := 0
-
-		if protocol == "TCP" && len(fields) >= 5 {
-			state = fields[3]
-			fmt.Sscanf(fields[len(fields)-1], "%d", &pid)
-		} else if len(fields) >= 4 {
-			fmt.Sscanf(fields[len(fields)-1], "%d", &pid)
-		}
-
-		connections = append(connections, ConnectionInfo{
-			Protocol:   protocol,
-			LocalAddr:  localAddr.addr,
-			LocalPort:  localAddr.port,
-			RemoteAddr: remoteAddr.addr,
-			RemotePort: remoteAddr.port,
-			State:      state,
-			PID:        pid,
+	conns, _ := GetAllConnections()
+	var result []ConnectionInfo
+	for _, c := range conns {
+		result = append(result, ConnectionInfo{
+			Protocol:   c.Protocol,
+			LocalAddr:  c.LocalAddr,
+			LocalPort:  c.LocalPort,
+			RemoteAddr: c.RemoteAddr,
+			RemotePort: c.RemotePort,
+			State:      c.State,
+			PID:        c.PID,
+			Process:    c.ProcessName,
 		})
 	}
-
-	return connections, nil
-}
-
-type addrInfo struct {
-	addr string
-	port int
-}
-
-func parseAddr(addr string) addrInfo {
-	// 处理 IPv4 和 IPv6 地址
-	if strings.HasPrefix(addr, "[") {
-		// IPv6: [addr]:port
-		parts := strings.SplitN(addr, "]:", 2)
-		if len(parts) == 2 {
-			var port int
-			fmt.Sscanf(parts[1], "%d", &port)
-			return addrInfo{addr: parts[0][1:], port: port}
-		}
-	}
-	// IPv4: addr:port
-	lastColon := strings.LastIndex(addr, ":")
-	if lastColon > 0 {
-		var port int
-		fmt.Sscanf(addr[lastColon+1:], "%d", &port)
-		return addrInfo{addr: addr[:lastColon], port: port}
-	}
-	return addrInfo{addr: addr, port: 0}
+	return result, nil
 }

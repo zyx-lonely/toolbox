@@ -2,9 +2,13 @@ package network
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
+	"strings"
+	"sync"
 	"syscall"
+	"time"
 )
 
 // RemoteDesktopInfo 远程桌面信息
@@ -42,7 +46,44 @@ func LaunchMSTSC(computer, address string, port int) error {
 
 // GetRDPClients 获取局域网中开启了 RDP 的设备
 func GetRDPClients() []RemoteDesktopInfo {
-	return []RemoteDesktopInfo{}
+	var clients []RemoteDesktopInfo
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	// 获取本机 IP 和子网
+	localIP := getLocalIP()
+	if localIP == "" {
+		return clients
+	}
+
+	// 计算子网范围 (假设 /24)
+	subnet := localIP[:strings.LastIndex(localIP, ".")+1]
+
+	// 并发扫描 1-254
+	for i := 1; i <= 254; i++ {
+		wg.Add(1)
+		go func(ipSuffix int) {
+			defer wg.Done()
+			ip := fmt.Sprintf("%s%d", subnet, ipSuffix)
+			if checkPort(ip, 3389) {
+				hostname, _ := net.LookupAddr(ip)
+				name := ip
+				if len(hostname) > 0 {
+					name = strings.TrimSuffix(hostname[0], ".")
+				}
+				mu.Lock()
+				clients = append(clients, RemoteDesktopInfo{
+					Computer: name,
+					Address:  ip,
+					Port:     3389,
+				})
+				mu.Unlock()
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	return clients
 }
 
 // CheckRDPPort 检查远程桌面端口是否开放
@@ -50,10 +91,15 @@ func CheckRDPPort(ip string) bool {
 	return checkPort(ip, 3389)
 }
 
+// checkPort 检查指定 IP 和端口是否开放
 func checkPort(ip string, port int) bool {
-	// 简化实现
-	_ = port
-	return false
+	addr := net.JoinHostPort(ip, fmt.Sprintf("%d", port))
+	conn, err := net.DialTimeout("tcp", addr, 500*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
 }
 
 func osTempDir() string {

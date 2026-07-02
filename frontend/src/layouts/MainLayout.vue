@@ -185,9 +185,11 @@ const menuOptions: MenuOption[] = [
       { label: '电源方案', key: '/system/powerplan' },
       { label: '进程管理器', key: '/system/process' },
       { label: '温度监控', key: '/system/temperature' },
+      { label: '电池信息', key: '/system/battery' },
       { label: '浏览器扩展', key: '/system/browser-ext' },
       { label: '导出报告', key: '/system/export' },
       { label: '快捷键管理', key: '/system/shortcuts' },
+      { label: '实时性能监控', key: '/system/perfmon' },
     ]
   },
   {
@@ -207,7 +209,8 @@ const menuOptions: MenuOption[] = [
       { label: '磁盘健康监控', key: '/optimize/disk-health' },
       { label: '服务依赖分析', key: '/optimize/service-dep' },
       { label: '文件关联管理', key: '/optimize/fileassoc' },
-      { label: '软件管理', key: '/optimize/software' }
+      { label: '软件管理', key: '/optimize/software' },
+      { label: '自动清理调度', key: '/optimize/cleanup' }
     ]
   },
   {
@@ -222,7 +225,6 @@ const menuOptions: MenuOption[] = [
       { label: 'WiFi 密码', key: '/network/wifi' },
       { label: 'WiFi 扫描', key: '/network/wifiscan' },
       { label: 'IP 冲突检测', key: '/network/ipconflict' },
-      { label: '局域网拓扑', key: '/network/topology' },
       { label: '批量 Ping', key: '/network/batchping' },
       { label: '流量图表', key: '/network/traffic' },
       { label: '远程桌面', key: '/network/rdp' },
@@ -230,6 +232,7 @@ const menuOptions: MenuOption[] = [
       { label: 'DNS 切换', key: '/network/dns' },
       { label: 'IP 子网计算器', key: '/network/subnet' },
       { label: '网速测试', key: '/network/speedtest' },
+      { label: '网络连接查看器', key: '/network/connections' },
     ]
   },
   {
@@ -253,7 +256,10 @@ const menuOptions: MenuOption[] = [
       { label: '文件解锁器', key: '/file/unlock' },
       { label: '文件时间戳修改', key: '/file/timestamp' },
       { label: '批量正则重命名', key: '/file/batchregex' },
-      { label: '文件预览', key: '/file/preview' }
+      { label: '文件预览', key: '/file/preview' },
+      { label: '磁盘空间树状图', key: '/file/disktree' },
+      { label: '图片批量加水印', key: '/file/watermark' },
+      { label: '文件夹监控', key: '/file/foldermonitor' }
     ]
   },
   {
@@ -280,9 +286,13 @@ const menuOptions: MenuOption[] = [
       { label: 'UUID 生成', key: '/devtools/uuid' },
       { label: 'Markdown 预览', key: '/devtools/markdown' },
       { label: '二维码生成', key: '/devtools/qrcode' },
+      { label: 'Base32/Hex 互转', key: '/devtools/codec-advanced' },
+      { label: '时间戳转换', key: '/devtools/timestamp' },
+      { label: '颜色代码转换', key: '/devtools/color' },
       { label: '密码生成器', key: '/security/password' },
       { label: '文件加密解密', key: '/security/encrypt' },
       { label: '文件粉碎', key: '/security/shred' },
+      { label: '防火墙管理', key: '/security/firewall' },
       { label: 'Cron 生成器', key: '/devtools/cron' },
       { label: '文本对比', key: '/devtools/textdiff' },
       { label: '文本字数统计', key: '/devtools/textcount' },
@@ -303,6 +313,10 @@ const menuOptions: MenuOption[] = [
       { label: '定时任务', key: '/daily/scheduler' },
       { label: '便签', key: '/daily/notepad' },
       { label: '屏幕标尺', key: '/daily/ruler' },
+      { label: '剪贴板翻译', key: '/daily/translate' },
+      { label: '汇率查询', key: '/daily/exchange' },
+      { label: '科学计算器', key: '/daily/calculator' },
+      { label: '屏幕录制', key: '/daily/screenrec' },
     ]
   },
   {

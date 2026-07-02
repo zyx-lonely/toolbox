@@ -36,8 +36,11 @@ func ScanWiFiSignal() []SignalInfo {
 	if err != nil {
 		return signals
 	}
-	// 转换 GBK 到 UTF-8
-	output := common.GbkToUtf8(string(out))
+	// 检测编码：如果包含 "SSID" 则已经是 UTF-8，否则尝试 GBK 转换
+	output := string(out)
+	if !strings.Contains(output, "SSID") {
+		output = common.GbkToUtf8(output)
+	}
 	lines := strings.Split(output, "\n")
 
 	var current SignalInfo
@@ -68,8 +71,8 @@ func ScanWiFiSignal() []SignalInfo {
 		}
 
 		if strings.Contains(line, "BSSID") || strings.Contains(line, "信号") || strings.Contains(line, "Signal") ||
-			strings.Contains(line, "信道") || strings.Contains(line, "Channel") ||
-			strings.Contains(line, "MHz") || strings.Contains(line, "认证") || strings.Contains(line, "Auth") {
+			strings.Contains(line, "频道") || strings.Contains(line, "信道") || strings.Contains(line, "Channel") ||
+			strings.Contains(line, "认证") || strings.Contains(line, "Auth") {
 
 			idx := strings.Index(line, ":")
 			if idx < 0 {
@@ -89,7 +92,7 @@ func ScanWiFiSignal() []SignalInfo {
 				if pct > 0 {
 					current.Signal = pct
 				}
-			} else if strings.Contains(line, "信道") || strings.Contains(line, "Channel") {
+			} else if strings.Contains(line, "频道") || strings.Contains(line, "信道") || strings.Contains(line, "Channel") {
 				if ch, err := strconv.Atoi(strings.Fields(val)[0]); err == nil {
 					current.Channel = ch
 				}

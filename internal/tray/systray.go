@@ -22,6 +22,8 @@ var (
 
 // SetApp sets the app reference for tray callbacks
 func SetApp(a interface{ MenuShowApp(); MenuQuit() }) {
+	mu.Lock()
+	defer mu.Unlock()
 	appContext = a
 }
 
@@ -59,12 +61,18 @@ func onReady() {
 		for {
 			select {
 			case <-showItem.ClickedCh:
-				if appContext != nil {
-					appContext.MenuShowApp()
+				mu.Lock()
+				ctx := appContext
+				mu.Unlock()
+				if ctx != nil {
+					ctx.MenuShowApp()
 				}
 			case <-quitItem.ClickedCh:
-				if appContext != nil {
-					appContext.MenuQuit()
+				mu.Lock()
+				ctx := appContext
+				mu.Unlock()
+				if ctx != nil {
+					ctx.MenuQuit()
 				}
 				return
 			}

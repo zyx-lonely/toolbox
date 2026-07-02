@@ -3,100 +3,135 @@
     <n-h2>启动项管理</n-h2>
     <n-p>查看和管理系统开机自启程序。</n-p>
 
-    <n-button type="primary" @click="loadItems" :loading="loading" class="mb-4">
-      刷新启动项
-    </n-button>
+    <n-space class="mb-4">
+      <n-button type="primary" @click="loadItems" :loading="loading">
+        刷新启动项
+      </n-button>
+      <n-input v-model:value="searchKeyword" placeholder="搜索启动项..." style="width: 200px" clearable />
+    </n-space>
 
-    <n-empty v-if="!loading && items.length === 0" description="暂无启动项数据" />
+    <n-space class="mb-4" v-if="group">
+      <n-statistic label="总数" :value="group.total" />
+      <n-statistic label="已启用" :value="group.enabled" />
+      <n-statistic label="已禁用" :value="group.disabled" />
+    </n-space>
+
+    <n-empty v-if="!loading && filteredItems.length === 0" description="暂无启动项数据" />
 
     <n-data-table
-      v-if="items.length > 0"
+      v-if="filteredItems.length > 0"
       :columns="columns"
-      :data="items"
+      :data="filteredItems"
       :bordered="true"
       :loading="loading"
       size="small"
+      :pagination="{ pageSize: 20 }"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { h, ref, onMounted } from 'vue'
-import { NSwitch, NTag, useMessage, NInput } from 'naive-ui'
-import { GetStartupItems, ToggleStartupItem, SetStartupItemDelay } from '@wails/go/main/App'
+import { h, ref, computed, onMounted } from 'vue'
+import { NSwitch, NTag, NButton, useMessage } from 'naive-ui'
+import { GetAllStartupPrograms, ToggleStartupProgram, DeleteStartupProgram } from '@wails/go/main/App'
 
-interface StartupItem { name: string; command: string; location: string; publisher: string; enabled: boolean; impact: string; delay: number }
+interface StartupProgram {
+  name: string
+  path: string
+  command: string
+  location: string
+  enabled: boolean
+  publisher: string
+  startTime: string
+  size: number
+  lastModified: string
+}
 
-const items = ref<StartupItem[]>([])
+interface StartupGroup {
+  total: number
+  enabled: number
+  disabled: number
+  hkcuCount: number
+  hklmCount: number
+  folderCount: number
+}
+
+const items = ref<StartupProgram[]>([])
+const group = ref<StartupGroup | null>(null)
 const loading = ref(false)
+const searchKeyword = ref('')
 const message = useMessage()
 
+const filteredItems = computed(() => {
+  if (!searchKeyword.value) return items.value
+  const kw = searchKeyword.value.toLowerCase()
+  return items.value.filter(item =>
+    item.name.toLowerCase().includes(kw) ||
+    item.command.toLowerCase().includes(kw) ||
+    item.location.toLowerCase().includes(kw)
+  )
+})
+
 const columns = [
-  { title: '名称', key: 'name', width: 180 },
-  { title: '命令', key: 'command', ellipsis: { tooltip: true } },
-  { title: '位置', key: 'location', width: 120 },
+  { title: '名称', key: 'name', width: 180, ellipsis: { tooltip: true } },
+  { title: '路径', key: 'path', ellipsis: { tooltip: true } },
   {
-    title: '影响', key: 'impact', width: 80,
-    render: (row: StartupItem) => {
-      const color = { high: 'error' as const, medium: 'warning' as const, low: 'success' as const }[row.impact] || 'default'
-      return h(NTag, { type: color, size: 'small' }, { default: () => row.impact })
+    title: '位置', key: 'location', width: 120,
+    render: (row: StartupProgram) => {
+      const colorMap: Record<string, string> = {
+        'HKCU-Run': 'success', 'HKCU-RunOnce': 'success',
+        'HKLM-Run': 'warning', 'HKLM-RunOnce': 'warning',
+        'StartupFolder': 'info'
+      }
+      return h(NTag, { type: (colorMap[row.location] || 'default') as any, size: 'small' }, { default: () => row.location })
     }
   },
   {
     title: '状态', key: 'enabled', width: 80,
-    render: (row: StartupItem) => h(NSwitch, {
+    render: (row: StartupProgram) => h(NSwitch, {
       value: row.enabled,
       onUpdateValue: (val: boolean) => toggleItem(row, val)
     })
   },
   {
-    title: '延迟(秒)', key: 'delay', width: 100,
-    render: (row: StartupItem) => h('div', { style: 'display: flex; align-items: center; gap: 4px' }, [
-      h(NInput, {
-        value: String(row.delay || 0),
-        size: 'small',
-        style: 'width: 60px',
-        placeholder: '0',
-        onUpdateValue: (val: string) => {
-          const delay = parseInt(val) || 0
-          setDelay(row, delay)
-        }
-      }),
-      h('span', { style: 'font-size: 12px; color: #999' }, { default: () => '秒' })
-    ])
+    title: '操作', width: 80,
+    render: (row: StartupProgram) => h(NButton, {
+      size: 'small', type: 'error', quaternary: true,
+      onClick: () => deleteItem(row)
+    }, { default: () => '删除' })
   }
 ]
 
 async function loadItems() {
   loading.value = true
   try {
-    const result = await GetStartupItems()
-    if (result) items.value = result as StartupItem[]
+    const result = await GetAllStartupPrograms()
+    if (result && Array.isArray(result)) {
+      items.value = result[0] as StartupProgram[]
+      group.value = result[1] as StartupGroup
+    }
   } catch (e) { console.error(e) }
   loading.value = false
 }
 
-async function toggleItem(item: StartupItem, enable: boolean) {
+async function toggleItem(item: StartupProgram, enable: boolean) {
   try {
-    await ToggleStartupItem(item.name, enable)
+    await ToggleStartupProgram(item.name, item.location, enable)
     item.enabled = enable
     message.success(enable ? '已启用' : '已禁用')
+    loadItems()
   } catch (e: any) {
     message.error(`操作失败: ${e}`)
   }
 }
 
-async function setDelay(item: StartupItem, delay: number) {
+async function deleteItem(item: StartupProgram) {
   try {
-    const r = await SetStartupItemDelay(item.name, delay)
-    if (r && r.success) {
-      item.delay = delay
-      message.success(`已设置延迟 ${delay} 秒`)
-    } else {
-      message.error(r?.error || '设置失败')
-    }
+    await DeleteStartupProgram(item.name, item.location)
+    message.success('已删除')
+    loadItems()
   } catch (e: any) {
-    message.error(`操作失败: ${e}`)
+    message.error(`删除失败: ${e}`)
   }
 }
 

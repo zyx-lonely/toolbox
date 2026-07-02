@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -23,10 +24,13 @@ type StartupItem struct {
 
 // disabledStartupStore 记录被禁用的启动项（用于重新启用）
 // 存储格式: 名称 -> {命令, 位置}
-var disabledStartupStore = make(map[string]struct {
-	command  string
-	location string
-})
+var (
+	disabledStartupStore = make(map[string]struct {
+		command  string
+		location string
+	})
+	disabledStartupMu sync.Mutex
+)
 
 // GetStartupItems 获取所有启动项
 func GetStartupItems() []StartupItem {
@@ -160,10 +164,12 @@ func disableStartupItem(name string) error {
 		val, valType, err := k.GetStringValue(name)
 		if err == nil && valType == registry.SZ {
 			// 保存到恢复存储
+			disabledStartupMu.Lock()
 			disabledStartupStore[name] = struct {
 				command  string
 				location string
 			}{command: val, location: loc.subKey}
+			disabledStartupMu.Unlock()
 		}
 
 		if err := k.DeleteValue(name); err == nil {
@@ -179,7 +185,9 @@ func disableStartupItem(name string) error {
 // enableStartupItem 重新启用启动项（从备份恢复）
 func enableStartupItem(name string) error {
 	// 查找被禁用的启动项信息
+	disabledStartupMu.Lock()
 	info, ok := disabledStartupStore[name]
+	disabledStartupMu.Unlock()
 	if !ok {
 		return fmt.Errorf("未找到启动项 %s 的备份记录，无法重新启用", name)
 	}
@@ -210,7 +218,9 @@ func enableStartupItem(name string) error {
 	}
 
 	// 从备份存储中移除
+	disabledStartupMu.Lock()
 	delete(disabledStartupStore, name)
+	disabledStartupMu.Unlock()
 	return nil
 }
 

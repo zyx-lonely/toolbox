@@ -116,3 +116,38 @@ func (a *App) ScanWiFiSignal() []network.SignalInfo {
 func (a *App) CheckIPConflict(localIP string) []string {
 	return network.CheckIPConflict(localIP)
 }
+
+// ============================================================
+//  网络连接查看器
+// ============================================================
+
+// GetAllNetConnections 获取所有网络连接
+func (a *App) GetAllNetConnections() []network.NetConnection {
+	conns, _ := network.GetAllConnections()
+	return conns
+}
+
+// GetEstablishedConnections 获取已建立的连接
+func (a *App) GetEstablishedConnections() []network.NetConnection {
+	return network.GetEstablishedConnections()
+}
+
+// GetListeningConnections 获取监听中的连接
+func (a *App) GetListeningConnections() []network.NetConnection {
+	return network.GetListeningConnections()
+}
+
+// SearchNetConnections 搜索网络连接
+func (a *App) SearchNetConnections(keyword string) []network.NetConnection {
+	return network.SearchConnections(keyword)
+}
+
+// KillNetConnection 终止网络连接
+func (a *App) KillNetConnection(pid int) error {
+	return network.KillConnection(pid)
+}
+
+// GetNetConnectionStats 获取网络连接统计
+func (a *App) GetNetConnectionStats() map[string]int {
+	return network.GetConnectionStats()
+}

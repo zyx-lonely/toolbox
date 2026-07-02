@@ -108,6 +108,103 @@ export namespace common {
 
 }
 
+export namespace daily {
+	
+	export class CalcResult {
+	    expression: string;
+	    result: number;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CalcResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.expression = source["expression"];
+	        this.result = source["result"];
+	        this.error = source["error"];
+	    }
+	}
+	export class CurrencyInfo {
+	    code: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CurrencyInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.name = source["name"];
+	    }
+	}
+	export class ExchangeRate {
+	    from: string;
+	    to: string;
+	    rate: number;
+	    amount: number;
+	    result: number;
+	    updateTime: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExchangeRate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.from = source["from"];
+	        this.to = source["to"];
+	        this.rate = source["rate"];
+	        this.amount = source["amount"];
+	        this.result = source["result"];
+	        this.updateTime = source["updateTime"];
+	    }
+	}
+	export class ScreenRecordResult {
+	    filePath: string;
+	    size: number;
+	    duration: string;
+	    success: boolean;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ScreenRecordResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.filePath = source["filePath"];
+	        this.size = source["size"];
+	        this.duration = source["duration"];
+	        this.success = source["success"];
+	        this.error = source["error"];
+	    }
+	}
+	export class TranslateResult {
+	    source: string;
+	    target: string;
+	    sourceLang: string;
+	    targetLang: string;
+	    provider: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TranslateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.target = source["target"];
+	        this.sourceLang = source["sourceLang"];
+	        this.targetLang = source["targetLang"];
+	        this.provider = source["provider"];
+	    }
+	}
+
+}
+
 export namespace devtools {
 	
 	export class CodeBeautifyResult {
@@ -142,6 +239,34 @@ export namespace devtools {
 	        this.input = source["input"];
 	        this.output = source["output"];
 	        this.error = source["error"];
+	    }
+	}
+	export class ColorConvert {
+	    hex: string;
+	    rgb: string;
+	    hsl: string;
+	    r: number;
+	    g: number;
+	    b: number;
+	    hue: number;
+	    sat: number;
+	    lit: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ColorConvert(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hex = source["hex"];
+	        this.rgb = source["rgb"];
+	        this.hsl = source["hsl"];
+	        this.r = source["r"];
+	        this.g = source["g"];
+	        this.b = source["b"];
+	        this.hue = source["hue"];
+	        this.sat = source["sat"];
+	        this.lit = source["lit"];
 	    }
 	}
 	export class ColorResult {
@@ -348,6 +473,26 @@ export namespace devtools {
 	        this.download_url = source["download_url"];
 	    }
 	}
+	export class TimestampConvert {
+	    timestamp: number;
+	    dateTime: string;
+	    unix10: number;
+	    unix13: number;
+	    iso8601: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TimestampConvert(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.timestamp = source["timestamp"];
+	        this.dateTime = source["dateTime"];
+	        this.unix10 = source["unix10"];
+	        this.unix13 = source["unix13"];
+	        this.iso8601 = source["iso8601"];
+	    }
+	}
 	export class TimestampResult {
 	    unixTimestamp: number;
 	    dateTime: string;
@@ -443,25 +588,43 @@ export namespace filetools {
 	        this.content = source["content"];
 	    }
 	}
-	export class DocConvertResult {
-	    inputPath: string;
-	    outputPath: string;
-	    targetType: string;
-	    success: boolean;
-	    error?: string;
+	export class DiskTreeNode {
+	    name: string;
+	    path: string;
+	    size: number;
+	    isDir: boolean;
+	    children?: DiskTreeNode[];
 	
 	    static createFrom(source: any = {}) {
-	        return new DocConvertResult(source);
+	        return new DiskTreeNode(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.inputPath = source["inputPath"];
-	        this.outputPath = source["outputPath"];
-	        this.targetType = source["targetType"];
-	        this.success = source["success"];
-	        this.error = source["error"];
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.size = source["size"];
+	        this.isDir = source["isDir"];
+	        this.children = this.convertValues(source["children"], DiskTreeNode);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class FileMatch {
 	    size: number;
@@ -574,6 +737,24 @@ export namespace filetools {
 	        this.totalLines = source["totalLines"];
 	    }
 	}
+	export class FolderChangeEvent {
+	    timestamp: string;
+	    type: string;
+	    path: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new FolderChangeEvent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.timestamp = source["timestamp"];
+	        this.type = source["type"];
+	        this.path = source["path"];
+	        this.size = source["size"];
+	    }
+	}
 	export class FolderSize {
 	    path: string;
 	    name: string;
@@ -614,120 +795,6 @@ export namespace filetools {
 	        this.type = source["type"];
 	    }
 	}
-	export class OrganizePreview {
-	    sourcePath: string;
-	    destPath: string;
-	    sourceName: string;
-	    folderName: string;
-	    fileSize: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new OrganizePreview(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.sourcePath = source["sourcePath"];
-	        this.destPath = source["destPath"];
-	        this.sourceName = source["sourceName"];
-	        this.folderName = source["folderName"];
-	        this.fileSize = source["fileSize"];
-	    }
-	}
-	export class OrganizeResult {
-	    sourcePath: string;
-	    destPath: string;
-	    success: boolean;
-	    error?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new OrganizeResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.sourcePath = source["sourcePath"];
-	        this.destPath = source["destPath"];
-	        this.success = source["success"];
-	        this.error = source["error"];
-	    }
-	}
-	export class OrganizeRule {
-	    mode: string;
-	    target: string;
-	    move: boolean;
-	    sortInto: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new OrganizeRule(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.mode = source["mode"];
-	        this.target = source["target"];
-	        this.move = source["move"];
-	        this.sortInto = source["sortInto"];
-	    }
-	}
-	export class RecycleBinInfo {
-	    itemCount: number;
-	    size: string;
-	    path: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new RecycleBinInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.itemCount = source["itemCount"];
-	        this.size = source["size"];
-	        this.path = source["path"];
-	    }
-	}
-	export class RenamePreview {
-	    originalPath: string;
-	    newPath: string;
-	    originalName: string;
-	    newName: string;
-	    index: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new RenamePreview(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.originalPath = source["originalPath"];
-	        this.newPath = source["newPath"];
-	        this.originalName = source["originalName"];
-	        this.newName = source["newName"];
-	        this.index = source["index"];
-	    }
-	}
-	export class RenameRule {
-	    pattern: string;
-	    startIndex: number;
-	    padding: number;
-	    replaceFrom: string;
-	    replaceTo: string;
-	    fileFilter: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new RenameRule(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.pattern = source["pattern"];
-	        this.startIndex = source["startIndex"];
-	        this.padding = source["padding"];
-	        this.replaceFrom = source["replaceFrom"];
-	        this.replaceTo = source["replaceTo"];
-	        this.fileFilter = source["fileFilter"];
-	    }
-	}
 	export class ReplaceResult {
 	    path: string;
 	    matches: number;
@@ -764,6 +831,24 @@ export namespace filetools {
 	        this.line = source["line"];
 	        this.content = source["content"];
 	        this.fileSize = source["fileSize"];
+	    }
+	}
+	export class WatermarkResult {
+	    file: string;
+	    width: number;
+	    height: number;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WatermarkResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.file = source["file"];
+	        this.width = source["width"];
+	        this.height = source["height"];
+	        this.size = source["size"];
 	    }
 	}
 
@@ -899,6 +984,32 @@ export namespace network {
 	        this.hostname = source["hostname"];
 	        this.vendor = source["vendor"];
 	        this.alive = source["alive"];
+	    }
+	}
+	export class NetConnection {
+	    protocol: string;
+	    localAddr: string;
+	    localPort: number;
+	    remoteAddr: string;
+	    remotePort: number;
+	    state: string;
+	    pid: number;
+	    processName: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new NetConnection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.protocol = source["protocol"];
+	        this.localAddr = source["localAddr"];
+	        this.localPort = source["localPort"];
+	        this.remoteAddr = source["remoteAddr"];
+	        this.remotePort = source["remotePort"];
+	        this.state = source["state"];
+	        this.pid = source["pid"];
+	        this.processName = source["processName"];
 	    }
 	}
 	export class PingResult {
@@ -1082,6 +1193,30 @@ export namespace optimize {
 	        this.error = source["error"];
 	    }
 	}
+	export class CleanupLog {
+	    taskId: string;
+	    taskName: string;
+	    runTime: string;
+	    freedSize: number;
+	    fileCount: number;
+	    status: string;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CleanupLog(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.taskId = source["taskId"];
+	        this.taskName = source["taskName"];
+	        this.runTime = source["runTime"];
+	        this.freedSize = source["freedSize"];
+	        this.fileCount = source["fileCount"];
+	        this.status = source["status"];
+	        this.error = source["error"];
+	    }
+	}
 	export class CleanupTarget {
 	    path: string;
 	    description: string;
@@ -1108,6 +1243,46 @@ export namespace optimize {
 	        this.error = source["error"];
 	    }
 	}
+	export class CleanupTask {
+	    id: string;
+	    name: string;
+	    enabled: boolean;
+	    schedule: string;
+	    dayOfWeek: number;
+	    dayOfMonth: number;
+	    hour: number;
+	    minute: number;
+	    intervalMin: number;
+	    targets: string[];
+	    autoDelete: boolean;
+	    maxAgeDays: number;
+	    lastRun: string;
+	    nextRun: string;
+	    runCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CleanupTask(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.enabled = source["enabled"];
+	        this.schedule = source["schedule"];
+	        this.dayOfWeek = source["dayOfWeek"];
+	        this.dayOfMonth = source["dayOfMonth"];
+	        this.hour = source["hour"];
+	        this.minute = source["minute"];
+	        this.intervalMin = source["intervalMin"];
+	        this.targets = source["targets"];
+	        this.autoDelete = source["autoDelete"];
+	        this.maxAgeDays = source["maxAgeDays"];
+	        this.lastRun = source["lastRun"];
+	        this.nextRun = source["nextRun"];
+	        this.runCount = source["runCount"];
+	    }
+	}
 	export class ContextMenuStatus {
 	    installed: boolean;
 	    path?: string;
@@ -1122,6 +1297,78 @@ export namespace optimize {
 	        this.installed = source["installed"];
 	        this.path = source["path"];
 	        this.error = source["error"];
+	    }
+	}
+	export class DiskHealthInfo {
+	    diskId: string;
+	    model: string;
+	    serial: string;
+	    size: number;
+	    healthStatus: string;
+	    temperature: number;
+	    powerOnHours: number;
+	    totalWritten: number;
+	    totalRead: number;
+	    errorRate: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DiskHealthInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.diskId = source["diskId"];
+	        this.model = source["model"];
+	        this.serial = source["serial"];
+	        this.size = source["size"];
+	        this.healthStatus = source["healthStatus"];
+	        this.temperature = source["temperature"];
+	        this.powerOnHours = source["powerOnHours"];
+	        this.totalWritten = source["totalWritten"];
+	        this.totalRead = source["totalRead"];
+	        this.errorRate = source["errorRate"];
+	    }
+	}
+	export class EnvVar {
+	    name: string;
+	    value: string;
+	    scope: string;
+	    expanded: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new EnvVar(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.value = source["value"];
+	        this.scope = source["scope"];
+	        this.expanded = source["expanded"];
+	    }
+	}
+	export class FileAssociation {
+	    extension: string;
+	    contentType: string;
+	    progId: string;
+	    description: string;
+	    openCommand: string;
+	    icon: string;
+	    defaultApp: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FileAssociation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.extension = source["extension"];
+	        this.contentType = source["contentType"];
+	        this.progId = source["progId"];
+	        this.description = source["description"];
+	        this.openCommand = source["openCommand"];
+	        this.icon = source["icon"];
+	        this.defaultApp = source["defaultApp"];
 	    }
 	}
 	export class HealthItem {
@@ -1246,6 +1493,24 @@ export namespace optimize {
 		    return a;
 		}
 	}
+	export class RegistryFixResult {
+	    key: string;
+	    success: boolean;
+	    error?: string;
+	    backupPath?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RegistryFixResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.success = source["success"];
+	        this.error = source["error"];
+	        this.backupPath = source["backupPath"];
+	    }
+	}
 	export class RegistryScanResult {
 	    key: string;
 	    value: string;
@@ -1270,6 +1535,7 @@ export namespace optimize {
 	    name: string;
 	    createdAt: string;
 	    description: string;
+	    sequence: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new RestorePointInfo(source);
@@ -1280,6 +1546,7 @@ export namespace optimize {
 	        this.name = source["name"];
 	        this.createdAt = source["createdAt"];
 	        this.description = source["description"];
+	        this.sequence = source["sequence"];
 	    }
 	}
 	export class ServiceBackup {
@@ -1297,6 +1564,62 @@ export namespace optimize {
 	        this.startType = source["startType"];
 	        this.status = source["status"];
 	    }
+	}
+	export class ServiceDependency {
+	    name: string;
+	    displayName: string;
+	    dependsOn: string[];
+	    dependedBy: string[];
+	    depType: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ServiceDependency(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.displayName = source["displayName"];
+	        this.dependsOn = source["dependsOn"];
+	        this.dependedBy = source["dependedBy"];
+	        this.depType = source["depType"];
+	    }
+	}
+	export class ServiceDependencyGraph {
+	    services: ServiceDependency[];
+	    isolated: string[];
+	    critical: string[];
+	    orphaned: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ServiceDependencyGraph(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.services = this.convertValues(source["services"], ServiceDependency);
+	        this.isolated = source["isolated"];
+	        this.critical = source["critical"];
+	        this.orphaned = source["orphaned"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ServiceInfo {
 	    name: string;
@@ -1321,6 +1644,28 @@ export namespace optimize {
 	    }
 	}
 	
+	export class StartupGroup {
+	    total: number;
+	    enabled: number;
+	    disabled: number;
+	    hkcuCount: number;
+	    hklmCount: number;
+	    folderCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new StartupGroup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.total = source["total"];
+	        this.enabled = source["enabled"];
+	        this.disabled = source["disabled"];
+	        this.hkcuCount = source["hkcuCount"];
+	        this.hklmCount = source["hklmCount"];
+	        this.folderCount = source["folderCount"];
+	    }
+	}
 	export class StartupItem {
 	    name: string;
 	    command: string;
@@ -1343,6 +1688,34 @@ export namespace optimize {
 	        this.enabled = source["enabled"];
 	        this.impact = source["impact"];
 	        this.delay = source["delay"];
+	    }
+	}
+	export class StartupProgram {
+	    name: string;
+	    path: string;
+	    command: string;
+	    location: string;
+	    enabled: boolean;
+	    publisher: string;
+	    startTime: string;
+	    size: number;
+	    lastModified: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StartupProgram(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.command = source["command"];
+	        this.location = source["location"];
+	        this.enabled = source["enabled"];
+	        this.publisher = source["publisher"];
+	        this.startTime = source["startTime"];
+	        this.size = source["size"];
+	        this.lastModified = source["lastModified"];
 	    }
 	}
 	export class UpdateInfo {
@@ -1475,6 +1848,34 @@ export namespace security {
 	        this.encryptedSize = source["encryptedSize"];
 	    }
 	}
+	export class FirewallRule {
+	    name: string;
+	    displayName: string;
+	    direction: string;
+	    action: string;
+	    protocol: string;
+	    localPort: string;
+	    program: string;
+	    enabled: boolean;
+	    profile: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FirewallRule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.displayName = source["displayName"];
+	        this.direction = source["direction"];
+	        this.action = source["action"];
+	        this.protocol = source["protocol"];
+	        this.localPort = source["localPort"];
+	        this.program = source["program"];
+	        this.enabled = source["enabled"];
+	        this.profile = source["profile"];
+	    }
+	}
 	export class PasswordResult {
 	    password: string;
 	    strength: string;
@@ -1585,6 +1986,34 @@ export namespace system {
 	        this.url = source["url"];
 	        this.openSource = source["openSource"];
 	        this.type = source["type"];
+	    }
+	}
+	export class BatteryInfo {
+	    name: string;
+	    status: string;
+	    chargeLevel: number;
+	    designCapacity: number;
+	    fullCapacity: number;
+	    voltage: number;
+	    temperature: number;
+	    healthPercent: number;
+	    isPresent: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new BatteryInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.status = source["status"];
+	        this.chargeLevel = source["chargeLevel"];
+	        this.designCapacity = source["designCapacity"];
+	        this.fullCapacity = source["fullCapacity"];
+	        this.voltage = source["voltage"];
+	        this.temperature = source["temperature"];
+	        this.healthPercent = source["healthPercent"];
+	        this.isPresent = source["isPresent"];
 	    }
 	}
 	export class BrowserExtension {
@@ -1789,6 +2218,42 @@ export namespace system {
 	        this.architecture = source["architecture"];
 	        this.installDate = source["installDate"];
 	        this.uptime = source["uptime"];
+	    }
+	}
+	export class PerfSnapshot {
+	    timestamp: number;
+	    cpuUsage: number;
+	    memoryUsage: number;
+	    memoryTotal: number;
+	    memoryUsed: number;
+	    memoryAvail: number;
+	    diskReadBps: number;
+	    diskWriteBps: number;
+	    netRecvBps: number;
+	    netSendBps: number;
+	    processCount: number;
+	    threadCount: number;
+	    handleCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PerfSnapshot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.timestamp = source["timestamp"];
+	        this.cpuUsage = source["cpuUsage"];
+	        this.memoryUsage = source["memoryUsage"];
+	        this.memoryTotal = source["memoryTotal"];
+	        this.memoryUsed = source["memoryUsed"];
+	        this.memoryAvail = source["memoryAvail"];
+	        this.diskReadBps = source["diskReadBps"];
+	        this.diskWriteBps = source["diskWriteBps"];
+	        this.netRecvBps = source["netRecvBps"];
+	        this.netSendBps = source["netSendBps"];
+	        this.processCount = source["processCount"];
+	        this.threadCount = source["threadCount"];
+	        this.handleCount = source["handleCount"];
 	    }
 	}
 	export class PowerPlan {

@@ -2,6 +2,7 @@ package clipboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -38,7 +39,10 @@ func getHistoryPath() string {
 		appData = "."
 	}
 	dir := filepath.Join(appData, "pc-toolbox")
-	_ = os.MkdirAll(dir, 0755)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		// 目录创建失败，使用当前目录作为回退
+		dir = "."
+	}
 	return filepath.Join(dir, "clipboard_history.json")
 }
 
@@ -82,7 +86,10 @@ func saveHistory() {
 	}
 
 	path := getHistoryPath()
-	_ = os.WriteFile(path, data, 0644)
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		// 日志记录保存失败，但不中断程序
+		fmt.Fprintf(os.Stderr, "保存剪贴板历史失败: %v\n", err)
+	}
 }
 
 // AddItem 添加剪贴板记录

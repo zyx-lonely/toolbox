@@ -118,3 +118,47 @@ func (a *App) BeautifySQL(input string) devtools.CodeBeautifyResult {
 func (a *App) GenerateQRCode(content string, size int) devtools.QRResult {
 	return devtools.GenerateQRCode(content, size)
 }
+
+// ============================================================
+//  转换工具
+// ============================================================
+
+// Base32ToHex Base32 转 Hex
+func (a *App) Base32ToHex(input string) (string, error) {
+	return devtools.Base32ToHex(input)
+}
+
+// HexToBase32 Hex 转 Base32
+func (a *App) HexToBase32(input string) (string, error) {
+	return devtools.HexToBase32(input)
+}
+
+// TimestampToDate 时间戳转日期
+func (a *App) TimestampToDate(ts int64) (*devtools.TimestampConvert, error) {
+	return devtools.TimestampToDate(ts)
+}
+
+// DateToTimestamp 日期转时间戳
+func (a *App) DateToTimestamp(dateStr string) (*devtools.TimestampConvert, error) {
+	return devtools.DateToTimestamp(dateStr)
+}
+
+// GetNowTimestamp 获取当前时间戳
+func (a *App) GetNowTimestamp() *devtools.TimestampConvert {
+	return devtools.GetNowTimestamp()
+}
+
+// HexToColor Hex 转 RGB/HSL
+func (a *App) HexToColor(hexStr string) (*devtools.ColorConvert, error) {
+	return devtools.HexToColor(hexStr)
+}
+
+// RGBToColor RGB 转 HEX/HSL
+func (a *App) RGBToColor(r, g, b int) (*devtools.ColorConvert, error) {
+	return devtools.RGBToColor(r, g, b)
+}
+
+// HSLToColor HSL 转 HEX/RGB
+func (a *App) HSLToColor(h, s, l int) (*devtools.ColorConvert, error) {
+	return devtools.HSLToColor(h, s, l)
+}

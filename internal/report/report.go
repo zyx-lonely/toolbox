@@ -68,10 +68,20 @@ type NetworkAdapter struct {
 func CollectReport() (r *SystemReport) {
 	defer func() {
 		if rec := recover(); rec != nil {
+			// 崩溃时尝试收集部分信息
+			hostname, _ := os.Hostname()
 			r = &SystemReport{
 				GeneratedAt: time.Now().Format("2006-01-02 15:04:05"),
-				OS: OSInfo{Name: "Windows", Hostname: "localhost", UserName: "user"},
-				CPU: CPUInfo{Cores: 4, LogicalCores: 8},
+				OS: OSInfo{
+					Name:         "Windows",
+					Hostname:     hostname,
+					UserName:     os.Getenv("USERNAME"),
+					Architecture: runtime.GOARCH,
+				},
+				CPU: CPUInfo{
+					LogicalCores: runtime.NumCPU(),
+					Cores:        runtime.NumCPU(),
+				},
 			}
 		}
 	}()
